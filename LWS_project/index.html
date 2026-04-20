@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TODO List</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>TODO List</h1>
+        
+        <div class="input-container">
+            <input type="text" id="task-input" placeholder="添加新任务...">
+            <button id="add-task-btn">添加</button>
+        </div>
+        
+        <ul class="task-list" id="task-list">
+            <!-- 任务项将通过JavaScript动态添加 -->
+        </ul>
+        
+        <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">全部</button>
+            <button class="filter-btn" data-filter="active">未完成</button>
+            <button class="filter-btn" data-filter="completed">已完成</button>
+        </div>
+    </div>
+    
+    <script src="js/script.js"></script>
+</body>
+</html>
