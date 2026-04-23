@@ -7,6 +7,22 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <!-- 城市背景 -->
+    <div class="city-background">
+        <!-- 高楼 -->
+        <div class="buildings" id="buildings"></div>
+        
+        <!-- 街道 -->
+        <div class="street">
+            <!-- 车辆 -->
+            <div class="vehicle car" style="animation-delay: 0s;"></div>
+            <div class="vehicle truck" style="animation-delay: 2s;"></div>
+            <div class="vehicle car" style="animation-delay: 4s;"></div>
+            <div class="vehicle truck" style="animation-delay: 6s;"></div>
+            <div class="vehicle car" style="animation-delay: 8s;"></div>
+        </div>
+    </div>
+    
     <div class="container">
         <h1>TODO List</h1>
         
@@ -27,5 +43,62 @@
     </div>
     
     <script src="js/script.js"></script>
+    <script>
+        // 生成高楼和窗户
+        function createBuildings() {
+            const buildingsContainer = document.getElementById('buildings');
+            const buildingCount = 15;
+            
+            for (let i = 0; i < buildingCount; i++) {
+                const building = document.createElement('div');
+                building.className = 'building';
+                
+                // 随机高度和宽度
+                const height = Math.random() * 300 + 100;
+                const width = Math.random() * 80 + 40;
+                
+                building.style.height = height + 'px';
+                building.style.width = width + 'px';
+                
+                // 生成窗户
+                createWindows(building, height, width);
+                
+                buildingsContainer.appendChild(building);
+            }
+        }
+        
+        // 生成窗户
+        function createWindows(building, buildingHeight, buildingWidth) {
+            const windowWidth = 8;
+            const windowHeight = 12;
+            const windowGap = 10;
+            
+            const windowsPerRow = Math.floor((buildingWidth - 20) / (windowWidth + windowGap));
+            const rows = Math.floor((buildingHeight - 20) / (windowHeight + windowGap));
+            
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < windowsPerRow; col++) {
+                    if (Math.random() > 0.3) { // 70% chance to have a window
+                        const window = document.createElement('div');
+                        window.className = 'window';
+                        
+                        const x = 10 + col * (windowWidth + windowGap);
+                        const y = 10 + row * (windowHeight + windowGap);
+                        
+                        window.style.left = x + 'px';
+                        window.style.top = y + 'px';
+                        window.style.width = windowWidth + 'px';
+                        window.style.height = windowHeight + 'px';
+                        window.style.animationDelay = Math.random() * 3 + 's';
+                        
+                        building.appendChild(window);
+                    }
+                }
+            }
+        }
+        
+        // 页面加载完成后生成高楼
+        window.addEventListener('load', createBuildings);
+    </script>
 </body>
 </html>
