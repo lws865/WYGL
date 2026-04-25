@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>收费平台 - 汇泰物业管理系统</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="main-container">
+            <div class="payment-platform-header">
+                <span class="payment-platform-title">收费平台</span>
+                <button class="btn btn-danger btn-sm" onclick="window.close()">关闭</button>
+            </div>
+
+            <div class="page-content">
+                <div class="payment-layout">
+                    <div class="payment-section">
+                        <div class="section-header">住户信息</div>
+                        <div class="section-body">
+                            <input type="text" id="residentSearch" class="form-control" placeholder="搜索住户..." oninput="searchResidents()">
+                            <div id="searchResults" class="search-results"></div>
+                            <div class="inline-group">
+                                <select id="buildingSelect" class="form-control" onchange="updateStairOptions()">
+                                    <option value="">楼号</option>
+                                </select>
+                                <select id="stairSelect" class="form-control" onchange="updateFloorOptions()">
+                                    <option value="">梯号</option>
+                                </select>
+                                <select id="floorSelect" class="form-control" onchange="updateRoomOptions()">
+                                    <option value="">层号</option>
+                                </select>
+                                <select id="roomSelect" class="form-control" onchange="loadResidentByRoom()">
+                                    <option value="">房号</option>
+                                </select>
+                            </div>
+                            <div class="resident-info-box">
+                                <span>住户：<b id="residentName">-</b></span>
+                                <span>电话：<b id="residentPhone">-</b></span>
+                                <span>面积：<b id="residentArea">-</b></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="payment-section">
+                        <div class="section-header">收费项目</div>
+                        <div class="section-body">
+                            <div class="inline-group">
+                                <select id="feeType" class="form-control" onchange="updateFeeSubTypeOptions(); updateFeeAmount();">
+                                    <option value="">收费分类</option>
+                                    <option value="property">物业费</option>
+                                    <option value="car">汽车停车费</option>
+                                    <option value="motorcycle">摩托停车费</option>
+                                    <option value="sanitation">卫生费</option>
+                                    <option value="water">水费</option>
+                                    <option value="other">其他收入</option>
+                                </select>
+                                <select id="feeSubType" class="form-control">
+                                    <option value="">收费细项</option>
+                                </select>
+                            </div>
+                            <div class="inline-group">
+                                <input type="number" id="feeQuantity" class="form-control" value="1" min="1" oninput="updateFeeAmount()">
+                                <input type="text" id="feeUnit" class="form-control" readonly placeholder="单位">
+                                <input type="number" id="feeUnitPrice" class="form-control" step="0.01" oninput="updateFeeAmount()" placeholder="单价">
+                                <input type="number" id="feeAmount" class="form-control" step="0.01" placeholder="金额">
+                            </div>
+                            <div class="inline-group">
+                                <select id="paymentYear" class="form-control">
+                                    <option value="">年份</option>
+                                </select>
+                                <input type="date" id="paymentDate" class="form-control">
+                            </div>
+                            <button class="btn btn-secondary" onclick="addToPaymentList()">添加到收费列表</button>
+                        </div>
+                    </div>
+
+                    <div class="payment-section payment-list-section">
+                        <div class="section-header">收费列表 <span id="itemCount" class="item-count"></span></div>
+                        <div class="section-body" style="flex-direction: column;">
+                            <div id="paymentListContainer" class="payment-list"></div>
+                            <textarea id="feeRemark" class="form-control remark-input" placeholder="备注信息..."></textarea>
+                            <div class="payment-footer">
+                                <div class="payment-total">
+                                    <span>合计：</span>
+                                    <span id="totalAmount" class="text-primary">¥0.00</span>
+                                </div>
+                                <button id="confirmBtn" class="btn btn-primary" onclick="confirmPayment()" disabled>确认收费</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/payment-platform.js"></script>
+</body>
+</html>

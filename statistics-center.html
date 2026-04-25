@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>统计中心 - 汇泰物业管理系统</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="main-container">
+            <nav class="navbar">
+                <div class="navbar-left">
+                    <h1 class="nav-title">汇泰物业管理系统</h1>
+                    <div class="nav-tabs">
+                        <a href="index.html" class="nav-tab">首页</a>
+                        <a href="basic-data.html" class="nav-tab">基础数据</a>
+                        <a href="building-data.html" class="nav-tab">楼房数据</a>
+                        <a href="resident-data.html" class="nav-tab">住户数据</a>
+                        <a href="statistics-center.html" class="nav-tab active">统计中心</a>
+                    </div>
+                </div>
+                <div class="navbar-right">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" placeholder="搜索...">
+                    </div>
+                    <div class="user-profile">
+                        <div class="user-avatar">管</div>
+                        <div class="user-info">
+                            <div class="user-name">管理员</div>
+                            <div class="user-role">系统管理员</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary">退出</button>
+                </div>
+            </nav>
+
+            <div class="page-content">
+                <div class="grid grid-cols-4 gap-4 mb-4">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-value">¥128,560</div>
+                                <div class="stat-label">本月收入</div>
+                            </div>
+                            <div class="stat-icon">💰</div>
+                        </div>
+                        <div class="stat-change positive">▲12.5% 较上月</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-value">¥45,230</div>
+                                <div class="stat-label">本月支出</div>
+                            </div>
+                            <div class="stat-icon">📊</div>
+                        </div>
+                        <div class="stat-change negative">▼3.2% 较上月</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-value">86</div>
+                                <div class="stat-label">管理楼房</div>
+                            </div>
+                            <div class="stat-icon">🏢</div>
+                        </div>
+                        <div class="stat-change neutral">共2,450 户</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-value">¥35,680</div>
+                                <div class="stat-label">待收费用</div>
+                            </div>
+                            <div class="stat-icon">⚠️</div>
+                        </div>
+                        <div class="stat-change neutral">23 户未缴</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">详细统计</h3>
+                    </div>
+                    <div class="grid grid-cols-4 gap-4">
+                        <div class="text-secondary" style="font-size: 12px;">
+                            <div class="mb-2" style="font-weight: 600;">收入统计</div>
+                            <div class="mb-2">物业费收入: <span class="text-primary">¥98,500</span></div>
+                            <div class="mb-2">停车费收入: <span class="text-primary">¥25,060</span></div>
+                            <div>其他收入: <span class="text-primary">¥5,000</span></div>
+                        </div>
+                        <div class="text-secondary" style="font-size: 12px;">
+                            <div class="mb-2" style="font-weight: 600;">支出统计</div>
+                            <div class="mb-2">人员工资: <span class="text-primary">¥25,000</span></div>
+                            <div class="mb-2">设备维护: <span class="text-primary">¥12,500</span></div>
+                            <div>其他支出: <span class="text-primary">¥7,730</span></div>
+                        </div>
+                        <div class="text-secondary" style="font-size: 12px;">
+                            <div class="mb-2" style="font-weight: 600;">楼房统计</div>
+                            <div class="mb-2">总楼栋数: <span class="text-primary">86 栋</span></div>
+                            <div class="mb-2">总户数: <span class="text-primary">2,450 户</span></div>
+                            <div>入住率: <span class="text-primary">92.5%</span></div>
+                        </div>
+                        <div class="text-secondary" style="font-size: 12px;">
+                            <div class="mb-2" style="font-weight: 600;">缴费统计</div>
+                            <div class="mb-2">已缴费户数: <span class="text-primary">2,427 户</span></div>
+                            <div class="mb-2">未缴费户数: <span class="text-primary">23 户</span></div>
+                            <div>缴费率: <span class="text-primary">99.1%</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

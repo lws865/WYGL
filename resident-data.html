@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>住户数据 - 汇泰物业管理系统</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="main-container">
+            <nav class="navbar">
+                <div class="navbar-left">
+                    <h1 class="nav-title">汇泰物业管理系统</h1>
+                    <div class="nav-tabs">
+                        <a href="index.html" class="nav-tab">首页</a>
+                        <a href="basic-data.html" class="nav-tab">基础数据</a>
+                        <a href="building-data.html" class="nav-tab">楼房数据</a>
+                        <a href="resident-data.html" class="nav-tab active">住户数据</a>
+                        <a href="statistics-center.html" class="nav-tab">统计中心</a>
+                    </div>
+                </div>
+                <div class="navbar-right">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" placeholder="搜索...">
+                    </div>
+                    <div class="user-profile">
+                        <div class="user-avatar">管</div>
+                        <div class="user-info">
+                            <div class="user-name">管理员</div>
+                            <div class="user-role">系统管理员</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary">退出</button>
+                </div>
+            </nav>
+
+            <div class="page-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-title">住户管理 <span id="totalDebtDisplay" style="font-size: 16px; color: #dc3545; font-weight: normal;"></span></h3>
+                            <p class="card-subtitle">管理住户信息和房产关系</p>
+                        </div>
+                        <button class="btn btn-primary btn-sm">+ 添加住户</button>
+                    </div>
+
+                    <div class="mb-4" style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; background-color: #f9f9f9;">
+                        <div class="inline-group mb-4" style="align-items: flex-start; margin-bottom: 25px;">
+                            <input type="text" id="searchInput" class="form-control" placeholder="搜索住户姓名或房号..." style="max-width: 300px;" oninput="filterResidents()">
+                            <select id="buildingSelect" class="form-control" onchange="updateStairOptions()">
+                                <option value="">楼号</option>
+                            </select>
+                            <select id="stairSelect" class="form-control" onchange="updateFloorOptions()">
+                                <option value="">梯号</option>
+                            </select>
+                            <select id="floorSelect" class="form-control" onchange="updateRoomOptions()">
+                                <option value="">层号</option>
+                            </select>
+                            <select id="roomSelect" class="form-control" onchange="filterResidents()">
+                                <option value="">房号</option>
+                            </select>
+                        </div>
+
+                        <div class="inline-group mb-3" style="margin-top: 20px;">
+                            <select id="statusFilter" class="form-control" onchange="filterResidents()">
+                                <option value="">入住状态</option>
+                                <option value="active">入住</option>
+                                <option value="inactive">未入住</option>
+                            </select>
+                            <select id="renovationFilter" class="form-control" onchange="filterResidents()">
+                                <option value="">装修状态</option>
+                                <option value="no">未装修</option>
+                                <option value="in_progress">装修中</option>
+                                <option value="completed">已装修</option>
+                            </select>
+                            <select id="debtFilter" class="form-control" onchange="filterResidents()">
+                                <option value="">房款状态</option>
+                                <option value="1">欠款</option>
+                                <option value="0">已结清</option>
+                            </select>
+                            <select id="propertyFilter" class="form-control" onchange="filterResidents()">
+                                <option value="">住户性质</option>
+                                <option value="excellent">优</option>
+                                <option value="medium">中</option>
+                                <option value="poor">差</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>姓名</th>
+                                    <th>楼号</th>
+                                    <th>梯号</th>
+                                    <th>层号</th>
+                                    <th>房号</th>
+                                    <th>电话</th>
+                                    <th>备注</th>
+                                    <th>状态</th>
+                                    <th>装修状态</th>
+                                    <th>房款状态</th>
+                                    <th>住户性质</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/resident-data.js"></script>
+</body>
+</html>

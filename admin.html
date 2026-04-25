@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员管理 - 汇泰物业管理系统</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="main-container">
+            <!-- 简化的标题栏 -->
+            <div class="simple-header">
+                <h1 class="header-title">管理员管理</h1>
+                <button class="btn btn-secondary" onclick="window.close()">关闭</button>
+            </div>
+
+            <div class="page-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-title">管理员管理</h3>
+                            <p class="card-subtitle">管理系统管理员账户</p>
+                        </div>
+                        <button class="btn btn-primary btn-sm" id="addAdminBtn">+ 添加管理员</button>
+                    </div>
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div class="table-cell">ID</div>
+                            <div class="table-cell">用户名</div>
+                            <div class="table-cell">角色</div>
+                            <div class="table-cell">创建时间</div>
+                            <div class="table-cell">操作</div>
+                        </div>
+                        <div id="adminTableBody" class="table-body"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理员对话框 -->
+    <div id="adminModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">添加管理员</h3>
+                <button id="closeModal" class="btn btn-secondary btn-sm">关闭</button>
+            </div>
+            <form id="adminForm" class="modal-body">
+                <input type="hidden" id="adminId">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="username" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="password" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>角色</label>
+                    <select id="role" class="form-control">
+                        <option value="admin">超级管理员</option>
+                        <option value="manager">普通管理员</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">保存</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeAdminModal()">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 删除确认对话框 -->
+    <div id="deleteModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>确认删除</h3>
+            </div>
+            <div class="modal-body">
+                <p>确定要删除该管理员吗？</p>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmDelete" class="btn btn-danger">确认删除</button>
+                <button id="cancelDelete" class="btn btn-secondary">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

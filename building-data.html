@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>楼房数据 - 汇泰物业管理系统</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* 模态框美化 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            animation: slideIn 0.3s ease-in-out;
+        }
+        
+        .modal-content.modal-sm {
+            max-width: 400px;
+        }
+        
+        .modal-header {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6c757d;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            background-color: #e9ecef;
+            color: #333;
+        }
+        
+        /* 所有添加和编辑页面统一设计 - 与登录页面风格一致 */
+        #buildingModal .modal-content,
+        #stairModal .modal-content,
+        #floorModal .modal-content,
+        #roomModal .modal-content {
+            max-width: 400px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            background-color: white;
+        }
+        
+        #buildingModal .modal-header,
+        #stairModal .modal-header,
+        #floorModal .modal-header,
+        #roomModal .modal-header {
+            padding: 24px 32px;
+            border: none;
+            text-align: center;
+            background-color: white;
+        }
+        
+        #buildingModal .modal-icon,
+        #stairModal .modal-icon,
+        #floorModal .modal-icon,
+        #roomModal .modal-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        
+        #buildingModal .modal-header h3,
+        #stairModal .modal-header h3,
+        #floorModal .modal-header h3,
+        #roomModal .modal-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1E293B;
+        }
+        
+        #buildingModal .modal-close,
+        #stairModal .modal-close,
+        #floorModal .modal-close,
+        #roomModal .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            color: #64748B;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        
+        #buildingModal .modal-close:hover,
+        #stairModal .modal-close:hover,
+        #floorModal .modal-close:hover,
+        #roomModal .modal-close:hover {
+            color: #1E293B;
+        }
+        
+        #buildingModal .modal-body,
+        #stairModal .modal-body,
+        #floorModal .modal-body,
+        #roomModal .modal-body {
+            padding: 0 36px 24px;
+            background-color: white;
+        }
+        
+        #buildingModal .form-group,
+        #stairModal .form-group,
+        #floorModal .form-group,
+        #roomModal .form-group {
+            margin-bottom: 16px;
+        }
+        
+        #buildingModal .form-group label,
+        #stairModal .form-group label,
+        #floorModal .form-group label,
+        #roomModal .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 500;
+            color: #1E293B;
+            font-size: 12px;
+            width: 80%;
+            margin: 0 auto 4px;
+        }
+        
+        #buildingModal .form-control,
+        #stairModal .form-control,
+        #floorModal .form-control,
+        #roomModal .form-control {
+            width: 80%;
+            margin: 0 auto;
+            display: block;
+            padding: 8px 12px;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            font-size: 12px;
+            transition: all 0.2s;
+            background: white;
+        }
+        
+        #buildingModal .form-control:focus,
+        #stairModal .form-control:focus,
+        #floorModal .form-control:focus,
+        #roomModal .form-control:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        #buildingModal .modal-footer,
+        #stairModal .modal-footer,
+        #floorModal .modal-footer,
+        #roomModal .modal-footer {
+            background-color: white;
+            padding: 0 36px 24px;
+            border-top: none;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        #buildingModal .btn,
+        #stairModal .btn,
+        #floorModal .btn,
+        #roomModal .btn {
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+            min-width: 80px;
+        }
+        
+        #buildingModal .btn-secondary,
+        #stairModal .btn-secondary,
+        #floorModal .btn-secondary,
+        #roomModal .btn-secondary {
+            background-color: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+        
+        #buildingModal .btn-secondary:hover,
+        #stairModal .btn-secondary:hover,
+        #floorModal .btn-secondary:hover,
+        #roomModal .btn-secondary:hover {
+            background-color: #e2e8f0;
+        }
+        
+        #buildingModal .btn-primary,
+        #stairModal .btn-primary,
+        #floorModal .btn-primary,
+        #roomModal .btn-primary {
+            background-color: #3B82F6;
+            color: white;
+            border: none;
+        }
+        
+        #buildingModal .btn-primary:hover,
+        #stairModal .btn-primary:hover,
+        #floorModal .btn-primary:hover,
+        #roomModal .btn-primary:hover {
+            background-color: #2563EB;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+        
+        .form-control::placeholder {
+            color: #6c757d;
+        }
+        
+        /* 按钮美化 - 恢复到原始样式 */
+        .modal-footer {
+            background-color: #f8f9fa;
+            padding: 15px 30px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: normal;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 70px;
+        }
+        
+        .btn-secondary {
+            background-color: #f8f9fa;
+            color: #333;
+            border-color: #ddd;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e9ecef;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0069d9;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .modal-content {
+                margin: 20px;
+                max-width: calc(100% - 40px);
+            }
+            
+            .modal-header,
+            .modal-body,
+            .modal-footer {
+                padding: 15px;
+            }
+        }
+        
+        /* 缩小添加按钮和下拉列表框 */
+        .section-actions .btn {
+            font-size: 11px;
+            padding: 4px 8px;
+            min-width: 50px;
+        }
+        
+        .filter-row select {
+            font-size: 11px;
+            padding: 4px 8px;
+        }
+        
+        /* 缩小模态框内的下拉列表框 */
+        .modal-content .form-control {
+            font-size: 11px;
+            padding: 6px 10px;
+        }
+        
+        .modal-content .form-group label {
+            font-size: 11px;
+        }
+        
+        .modal-content .btn {
+            font-size: 11px;
+            padding: 4px 8px;
+            min-width: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="main-container">
+            <nav class="navbar">
+                <div class="navbar-left">
+                    <h1 class="nav-title">汇泰物业管理系统</h1>
+                    <div class="nav-tabs">
+                        <a href="index.html" class="nav-tab">首页</a>
+                        <a href="basic-data.html" class="nav-tab">基础数据</a>
+                        <a href="building-data.html" class="nav-tab active">楼房数据</a>
+                        <a href="resident-data.html" class="nav-tab">住户数据</a>
+                        <a href="statistics-center.html" class="nav-tab">统计中心</a>
+                    </div>
+                </div>
+                <div class="navbar-right">
+                    <div class="user-profile">
+                        <div class="user-avatar">管</div>
+                        <div class="user-info">
+                            <div class="user-name">管理员</div>
+                            <div class="user-role">系统管理员</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" id="logoutBtn">退出</button>
+                </div>
+            </nav>
+
+            <div class="page-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-title">楼房管理</h3>
+                            <p class="card-subtitle">管理系统楼房、梯号、层号和房号</p>
+                        </div>
+                    </div>
+
+                    <div class="section-group">
+                        <div class="section-item">
+                            <div class="section-header" onclick="toggleSection('building')">
+                                <span class="section-title">楼号管理</span>
+                                <div class="section-actions">
+                                    <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openBuildingModal()">+ 添加楼号</button>
+                                    <span class="toggle-icon" id="toggle-building">▼</span>
+                                </div>
+                            </div>
+                            <div class="section-content" id="content-building">
+                                <div class="table-header">
+                                    <div class="table-cell">ID</div>
+                                    <div class="table-cell">楼号</div>
+                                    <div class="table-cell">总层数</div>
+                                    <div class="table-cell">操作</div>
+                                </div>
+                                <div id="buildingTableBody" class="table-container"></div>
+                            </div>
+                        </div>
+
+                        <div class="section-item">
+                            <div class="section-header" onclick="toggleSection('stair')">
+                                <span class="section-title">梯号管理</span>
+                                <div class="section-actions">
+                                    <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openStairModal()">+ 添加梯号</button>
+                                    <span class="toggle-icon" id="toggle-stair">▼</span>
+                                </div>
+                            </div>
+                            <div class="section-content" id="content-stair">
+                                <div class="filter-row">
+                                    <select id="stairBuildingFilter" class="form-control" onchange="loadStairData()">
+                                        <option value="">选择楼号</option>
+                                    </select>
+                                </div>
+                                <div class="table-header">
+                                    <div class="table-cell">ID</div>
+                                    <div class="table-cell">所属楼号</div>
+                                    <div class="table-cell">梯号</div>
+                                    <div class="table-cell">操作</div>
+                                </div>
+                                <div id="stairTableBody" class="table-container"></div>
+                            </div>
+                        </div>
+
+                        <div class="section-item">
+                            <div class="section-header" onclick="toggleSection('floor')">
+                                <span class="section-title">层号管理</span>
+                                <div class="section-actions">
+                                    <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openFloorModal()">+ 添加层号</button>
+                                    <button class="btn btn-success btn-sm" onclick="event.stopPropagation(); batchAddFloorsByBuilding()">一键添加</button>
+                                    <span class="toggle-icon" id="toggle-floor">▼</span>
+                                </div>
+                            </div>
+                            <div class="section-content" id="content-floor">
+                                <div class="filter-row">
+                                    <select id="floorBuildingFilter" class="form-control" onchange="loadFloorBuildingStairSelect()">
+                                        <option value="">选择楼号</option>
+                                    </select>
+                                    <select id="floorStairFilter" class="form-control" onchange="loadFloorData()">
+                                        <option value="">选择梯号</option>
+                                    </select>
+                                </div>
+                                <div class="table-header">
+                                    <div class="table-cell">ID</div>
+                                    <div class="table-cell">所属楼号</div>
+                                    <div class="table-cell">所属梯号</div>
+                                    <div class="table-cell">层号</div>
+                                    <div class="table-cell">操作</div>
+                                </div>
+                                <div id="floorTableBody" class="table-container"></div>
+                            </div>
+                        </div>
+
+                        <div class="section-item">
+                            <div class="section-header" onclick="toggleSection('room')">
+                                <span class="section-title">房号管理</span>
+                                <div class="section-actions">
+                                    <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openRoomModal()">+ 添加房号</button>
+                                    <span class="toggle-icon" id="toggle-room">▼</span>
+                                </div>
+                            </div>
+                            <div class="section-content" id="content-room">
+                                <div class="filter-row">
+                                    <select id="roomBuildingFilter" class="form-control" onchange="loadRoomBuildingStairSelect()">
+                                        <option value="">选择楼号</option>
+                                    </select>
+                                    <select id="roomStairFilter" class="form-control" onchange="loadRoomStairFloorSelect()">
+                                        <option value="">选择梯号</option>
+                                    </select>
+                                    <select id="roomFloorFilter" class="form-control" onchange="loadRoomData()">
+                                        <option value="">选择层号</option>
+                                    </select>
+                                </div>
+                                <div class="table-header">
+                                    <div class="table-cell">ID</div>
+                                    <div class="table-cell">所属楼号</div>
+                                    <div class="table-cell">所属梯号</div>
+                                    <div class="table-cell">所属层号</div>
+                                    <div class="table-cell">房号</div>
+                                    <div class="table-cell">操作</div>
+                                </div>
+                                <div id="roomTableBody" class="table-container"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="buildingModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon" style="font-size: 40px; margin-bottom: 12px;">🏢</div>
+                <h3 id="buildingModalTitle">添加楼号</h3>
+                <button class="modal-close" onclick="closeBuildingModal()">×</button>
+            </div>
+            <form id="buildingForm">
+                <input type="hidden" id="buildingId">
+                <div class="form-group">
+                    <label>楼号</label>
+                    <input type="text" id="buildingNumber" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>总层数</label>
+                    <input type="number" id="floorCount" class="form-control">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeBuildingModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="stairModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon" style="font-size: 40px; margin-bottom: 12px;">🚶</div>
+                <h3 id="stairModalTitle">添加梯号</h3>
+                <button class="modal-close" onclick="closeStairModal()">×</button>
+            </div>
+            <form id="stairForm">
+                <input type="hidden" id="stairId">
+                <div class="form-group">
+                    <label>所属楼号</label>
+                    <select id="stairBuildingId" class="form-control" required>
+                        <option value="">选择楼号</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>梯号</label>
+                    <input type="text" id="stairNumber" class="form-control" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeStairModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="floorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon" style="font-size: 40px; margin-bottom: 12px;">📶</div>
+                <h3 id="floorModalTitle">添加层号</h3>
+                <button class="modal-close" onclick="closeFloorModal()">×</button>
+            </div>
+            <form id="floorForm">
+                <input type="hidden" id="floorId">
+                <div class="form-group">
+                    <label>所属楼号</label>
+                    <select id="floorBuildingId" class="form-control" required onchange="loadFloorStairSelect()">
+                        <option value="">选择楼号</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>所属梯号</label>
+                    <select id="floorStairId" class="form-control" required>
+                        <option value="">选择梯号</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>层号</label>
+                    <input type="number" id="floorNumber" class="form-control" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeFloorModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="roomModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon" style="font-size: 40px; margin-bottom: 12px;">🏠</div>
+                <h3 id="roomModalTitle">添加房号</h3>
+                <button class="modal-close" onclick="closeRoomModal()">×</button>
+            </div>
+            <form id="roomForm">
+                <input type="hidden" id="roomId">
+                <div class="form-group">
+                    <label>所属楼号</label>
+                    <select id="roomBuildingId" class="form-control" required onchange="loadRoomStairSelect()">
+                        <option value="">选择楼号</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>所属梯号</label>
+                    <select id="roomStairId" class="form-control" required onchange="loadRoomFloorSelect()">
+                        <option value="">选择梯号</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>所属层号</label>
+                    <select id="roomFloorId" class="form-control" required>
+                        <option value="">选择层号</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>房号</label>
+                    <input type="text" id="roomNumber" class="form-control" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeRoomModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="deleteModal" class="modal">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <h3>确认删除</h3>
+                <button class="modal-close" onclick="closeDeleteModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p id="deleteMessage">确定要删除吗？</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">取消</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDelete()">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/building-data.js"></script>
+</body>
+</html>

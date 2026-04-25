@@ -1,0 +1,31 @@
+{
+  "name": "property-management-system",
+  "version": "1.0.0",
+  "description": "物业管理系统",
+  "main": "backend/server.js",
+  "scripts": {
+    "init-db": "node backend/init-database.js",
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js"
+  },
+  "dependencies": {
+    "@mapbox/node-pre-gyp": "^2.0.3",
+    "bindings": "^1.5.0",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "sql.js": "^1.14.1",
+    "sqlite3": "^6.0.1"
+  },
+  "devDependencies": {
+    "node-gyp": "^12.3.0",
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "property",
+    "management",
+    "sqlite"
+  ],
+  "author": "",
+  "license": "MIT"
+}

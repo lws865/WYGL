@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>基础数据 - 汇泰物业管理系统</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="main-container">
+            <nav class="navbar">
+                <div class="navbar-left">
+                    <h1 class="nav-title">汇泰物业管理系统</h1>
+                    <div class="nav-tabs">
+                        <a href="index.html" class="nav-tab">首页</a>
+                        <a href="basic-data.html" class="nav-tab active">基础数据</a>
+                        <a href="building-data.html" class="nav-tab">楼房数据</a>
+                        <a href="resident-data.html" class="nav-tab">住户数据</a>
+                        <a href="statistics-center.html" class="nav-tab">统计中心</a>
+                    </div>
+                </div>
+                <div class="navbar-right">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" placeholder="搜索...">
+                    </div>
+                    <div class="user-profile">
+                        <div class="user-avatar">管</div>
+                        <div class="user-info">
+                            <div class="user-name">管理员</div>
+                            <div class="user-role">系统管理员</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="logout()">退出</button>
+                </div>
+            </nav>
+
+            <div class="page-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-title">费用管理</h3>
+                            <p class="card-subtitle">管理各类费用标准和基础数据</p>
+                        </div>
+                    </div>
+
+                    <div class="section-group">
+                        <div class="section-item">
+                            <div class="section-header">
+                                <span class="section-title">1. 物业管理费</span>
+                                <div class="section-actions">
+                                    <button class="btn btn-primary btn-sm" onclick="openFeeModal('property')">+ 添加</button>
+                                </div>
+                            </div>
+                            <div class="section-content">
+                                <div class="table-header">
+                                    <div class="table-cell">ID</div>
+                                    <div class="table-cell">描述</div>
+                                    <div class="table-cell">金额 (元)</div>
+                                    <div class="table-cell">操作</div>
+                                </div>
+                                <div id="propertyTableBody" class="table-container"></div>
+                            </div>
+                        </div>
+
+                        <div class="section-item">
+                            <div class="section-header">
+                                <span class="section-title">2. 卫生费</span>
+                                <div class="section-actions">
+                                    <button class="btn btn-primary btn-sm" onclick="openFeeModal('sanitation')">+ 添加</button>
+                                </div>
+                            </div>
+                            <div class="section-content">
+                                <div class="table-header">
+                                    <div class="table-cell">ID</div>
+                                    <div class="table-cell">描述</div>
+                                    <div class="table-cell">金额 (元)</div>
+                                    <div class="table-cell">操作</div>
+                                </div>
+                                <div id="sanitationTableBody" class="table-container"></div>
+                            </div>
+                        </div>
+
+                        <div class="section-item">
+                            <div class="section-header">
+                                <span class="section-title">3. 汽车停车费</span>
+                                <div class="section-actions">
+                                    <button class="btn btn-primary btn-sm" onclick="openFeeModal('car')">+ 添加</button>
+                                </div>
+                            </div>
+                            <div class="section-content">
+                                <div class="table-header">
+                                    <div class="table-cell">ID</div>
+                                    <div class="table-cell">描述</div>
+                                    <div class="table-cell">金额 (元)</div>
+                                    <div class="table-cell">操作</div>
+                                </div>
+                                <div id="carTableBody" class="table-container"></div>
+                            </div>
+                        </div>
+
+                        <div class="section-item">
+                            <div class="section-header">
+                                <span class="section-title">4. 摩托车停车费</span>
+                                <div class="section-actions">
+                                    <button class="btn btn-primary btn-sm" onclick="openFeeModal('motorcycle')">+ 添加</button>
+                                </div>
+                            </div>
+                            <div class="section-content">
+                                <div class="table-header">
+                                    <div class="table-cell">ID</div>
+                                    <div class="table-cell">描述</div>
+                                    <div class="table-cell">金额 (元)</div>
+                                    <div class="table-cell">操作</div>
+                                </div>
+                                <div id="motorcycleTableBody" class="table-container"></div>
+                            </div>
+                        </div>
+
+                        <div class="section-item">
+                            <div class="section-header">
+                                <span class="section-title">5. 水电费</span>
+                                <div class="section-actions">
+                                    <button class="btn btn-primary btn-sm" onclick="openFeeModal('water')">+ 添加</button>
+                                </div>
+                            </div>
+                            <div class="section-content">
+                                <div class="table-header">
+                                    <div class="table-cell">ID</div>
+                                    <div class="table-cell">描述</div>
+                                    <div class="table-cell">金额 (元)</div>
+                                    <div class="table-cell">操作</div>
+                                </div>
+                                <div id="waterTableBody" class="table-container"></div>
+                            </div>
+                        </div>
+
+                        <div class="section-item">
+                            <div class="section-header">
+                                <span class="section-title">6. 其他费用</span>
+                                <div class="section-actions">
+                                    <button class="btn btn-primary btn-sm" onclick="openFeeModal('other')">+ 添加</button>
+                                </div>
+                            </div>
+                            <div class="section-content">
+                                <div class="table-header">
+                                    <div class="table-cell">ID</div>
+                                    <div class="table-cell">描述</div>
+                                    <div class="table-cell">金额 (元)</div>
+                                    <div class="table-cell">操作</div>
+                                </div>
+                                <div id="otherTableBody" class="table-container"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* 所有添加和编辑页面统一设计 - 与登录页面风格一致 */
+        #feeModal .modal-content {
+            max-width: 400px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            background-color: white;
+        }
+        
+        #feeModal .modal-header {
+            padding: 24px 32px;
+            border: none;
+            text-align: center;
+            background-color: white;
+        }
+        
+        #feeModal .modal-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        
+        #feeModal .modal-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1E293B;
+        }
+        
+        #feeModal .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            color: #64748B;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        
+        #feeModal .modal-close:hover {
+            color: #1E293B;
+        }
+        
+        #feeModal .modal-body {
+            padding: 0 36px 24px;
+            background-color: white;
+        }
+        
+        #feeModal .form-group {
+            margin-bottom: 16px;
+        }
+        
+        #feeModal .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 500;
+            color: #1E293B;
+            font-size: 12px;
+            width: 80%;
+            margin: 0 auto 4px;
+        }
+        
+        #feeModal .form-control {
+            width: 80%;
+            margin: 0 auto;
+            display: block;
+            padding: 8px 12px;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            font-size: 12px;
+            transition: all 0.2s;
+            background: white;
+        }
+        
+        #feeModal .form-control:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        #feeModal .modal-footer {
+            background-color: white;
+            padding: 0 36px 24px;
+            border-top: none;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        #feeModal .btn {
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+            min-width: 80px;
+        }
+        
+        #feeModal .btn-secondary {
+            background-color: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+        
+        #feeModal .btn-secondary:hover {
+            background-color: #e2e8f0;
+        }
+        
+        #feeModal .btn-primary {
+            background-color: #3B82F6;
+            color: white;
+            border: none;
+        }
+        
+        #feeModal .btn-primary:hover {
+            background-color: #2563EB;
+        }
+    </style>
+    <div id="feeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon">💰</div>
+                <h3 id="feeModalTitle">添加费用</h3>
+                <button class="modal-close" onclick="closeFeeModal()">×</button>
+            </div>
+            <form id="feeForm">
+                <input type="hidden" id="feeId">
+                <input type="hidden" id="feeType">
+                <div class="form-group">
+                    <label>描述</label>
+                    <input type="text" id="feeDescription" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>金额 (元)</label>
+                    <input type="number" id="feeAmount" class="form-control" step="0.01" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeFeeModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="deleteModal" class="modal">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <h3>确认删除</h3>
+                <button class="modal-close" onclick="closeDeleteModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p id="deleteMessage">确定要删除此费用吗？此操作不可恢复。</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">取消</button>
+                <button type="button" class="btn btn-primary" onclick="confirmDelete()">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/basic-data.js"></script>
+</body>
+</html>

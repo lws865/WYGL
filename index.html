@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>汇泰物业管理系统</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="main-container">
+            <nav class="navbar">
+                <div class="navbar-left">
+                    <h1 class="nav-title">汇泰物业管理系统</h1>
+                    <div class="nav-tabs">
+                        <a href="index.html" class="nav-tab active">首页</a>
+                        <a href="basic-data.html" class="nav-tab">基础数据</a>
+                        <a href="building-data.html" class="nav-tab">楼房数据</a>
+                        <a href="resident-data.html" class="nav-tab">住户数据</a>
+                        <a href="statistics-center.html" class="nav-tab">统计中心</a>
+                    </div>
+                </div>
+                <div class="navbar-right">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" placeholder="搜索...">
+                    </div>
+                    <div class="user-profile" onclick="showUserMenu()">
+                        <div class="user-avatar">管</div>
+                        <div class="user-info">
+                            <div class="user-name" id="userName">管理员</div>
+                            <div class="user-role" id="userRole">系统管理员</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="logout()">退出</button>
+                </div>
+            </nav>
+
+            <div class="page-content">
+                <div class="grid grid-cols-4 gap-4 mb-4">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-value">¥128,500</div>
+                                <div class="stat-label">本月收入</div>
+                            </div>
+                            <div class="stat-icon">💰</div>
+                        </div>
+                        <div class="stat-change positive">+12.5% 较上月</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-value">258</div>
+                                <div class="stat-label">住户总数</div>
+                            </div>
+                            <div class="stat-icon">👥</div>
+                        </div>
+                        <div class="stat-change positive">+3 较上月</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-value">98.5%</div>
+                                <div class="stat-label">缴费率</div>
+                            </div>
+                            <div class="stat-icon">📊</div>
+                        </div>
+                        <div class="stat-change positive">+1.2% 较上月</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-value">12</div>
+                                <div class="stat-label">待处理事项</div>
+                            </div>
+                            <div class="stat-icon">⚠️</div>
+                        </div>
+                        <div class="stat-change negative">+2 较昨日</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">快捷功能</h3>
+                        </div>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button class="btn btn-primary" onclick="window.open('payment-platform.html', '_blank')">💳 收费平台</button>
+                            <button class="btn btn-secondary">📝 工单处理</button>
+                            <button class="btn btn-secondary">🔧 设备管理</button>
+                            <button class="btn btn-secondary">📋 报表导出</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">最新动态</h3>
+                        </div>
+                        <div class="text-secondary" style="font-size: 12px;">
+                            <div class="mb-2">✓ A栋302室缴纳物业费 ¥2,580 <span class="text-light">10分钟前</span></div>
+                            <div class="mb-2">! B栋电梯故障报修待处理 <span class="text-light">30分钟前</span></div>
+                            <div class="mb-2">i C栋物业费账单已生成 <span class="text-light">1小时前</span></div>
+                            <div>✓ D栋501室办理入住手续 <span class="text-light">2小时前</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="js/script.js"></script>
+</body>
+</html>
