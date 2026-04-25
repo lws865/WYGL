@@ -43,7 +43,21 @@
                             <h3 class="card-title">住户管理 <span id="totalDebtDisplay" style="font-size: 16px; color: #dc3545; font-weight: normal;"></span></h3>
                             <p class="card-subtitle">管理住户信息和房产关系</p>
                         </div>
-                        <button class="btn btn-primary btn-sm">+ 添加住户</button>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <button class="btn btn-primary btn-sm">+ 添加住户</button>
+                            <div class="calendar-widget" style="position: relative; display: inline-block;">
+                                <div style="display: flex; align-items: center; padding: 6px 12px; background: #f8f9fa; border-radius: 4px; font-size: 14px; cursor: pointer;" onclick="toggleYearSelector()">
+                                    <span style="margin-right: 8px;">📅</span>
+                                    <span id="currentYear"></span>
+                                    <span style="margin-left: 8px; font-size: 12px;">▼</span>
+                                </div>
+                                <div id="yearSelector" style="position: absolute; top: 100%; right: 0; margin-top: 2px; background: white; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 1000; min-width: 120px; display: none;">
+                                    <div style="max-height: 200px; overflow-y: auto;">
+                                        <!-- 年份选项将通过JavaScript动态生成 -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="mb-4" style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; background-color: #f9f9f9;">

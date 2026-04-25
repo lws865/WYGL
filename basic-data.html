@@ -39,16 +39,19 @@
             <div class="page-content">
                 <div class="card">
                     <div class="card-header">
-                        <div>
-                            <h3 class="card-title">费用管理</h3>
-                            <p class="card-subtitle">管理各类费用标准和基础数据</p>
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div>
+                                <h3 class="card-title">费用管理</h3>
+                                <p class="card-subtitle">管理各类费用标准和基础数据</p>
+                            </div>
+
                         </div>
                     </div>
 
                     <div class="section-group">
-                        <div class="section-item">
+                        <div class="section-item property-fee-section">
                             <div class="section-header">
-                                <span class="section-title">1. 物业管理费</span>
+                                <span class="section-title">1. 物业楼层基础费</span>
                                 <div class="section-actions">
                                     <button class="btn btn-primary btn-sm" onclick="openFeeModal('property')">+ 添加</button>
                                 </div>
@@ -120,25 +123,42 @@
 
                         <div class="section-item">
                             <div class="section-header">
-                                <span class="section-title">5. 水电费</span>
+                                <span class="section-title">5. 物业管理费项目</span>
                                 <div class="section-actions">
-                                    <button class="btn btn-primary btn-sm" onclick="openFeeModal('water')">+ 添加</button>
+                                    <button class="btn btn-primary btn-sm" onclick="openPropertyManagementItemModal()">+ 添加</button>
                                 </div>
                             </div>
                             <div class="section-content">
                                 <div class="table-header">
-                                    <div class="table-cell">ID</div>
-                                    <div class="table-cell">描述</div>
-                                    <div class="table-cell">金额 (元)</div>
-                                    <div class="table-cell">操作</div>
+                                    <div class="table-cell" style="flex:0.5">ID</div>
+                                    <div class="table-cell" style="flex:3">描述</div>
+                                    <div class="table-cell" style="flex:0.5">操作</div>
                                 </div>
-                                <div id="waterTableBody" class="table-container"></div>
+                                <div id="propertyManagementItemsTableBody" class="table-container"></div>
                             </div>
                         </div>
 
                         <div class="section-item">
                             <div class="section-header">
-                                <span class="section-title">6. 其他费用</span>
+                                <span class="section-title">6. 电梯管理费项目</span>
+                                <div class="section-actions">
+                                    <button class="btn btn-primary btn-sm" onclick="openElevatorManagementItemModal()">+ 添加</button>
+                                </div>
+                            </div>
+                            <div class="section-content">
+                                <div class="table-header">
+                                    <div class="table-cell" style="flex:0.5">ID</div>
+                                    <div class="table-cell" style="flex:2">描述</div>
+                                    <div class="table-cell" style="flex:1">金额 (元)</div>
+                                    <div class="table-cell" style="flex:0.5">操作</div>
+                                </div>
+                                <div id="elevatorManagementItemsTableBody" class="table-container"></div>
+                            </div>
+                        </div>
+
+                        <div class="section-item">
+                            <div class="section-header">
+                                <span class="section-title">7. 其他费用</span>
                                 <div class="section-actions">
                                     <button class="btn btn-primary btn-sm" onclick="openFeeModal('other')">+ 添加</button>
                                 </div>
@@ -278,6 +298,234 @@
         #feeModal .btn-primary:hover {
             background-color: #2563EB;
         }
+
+        /* 物业管理费项目模态框样式 */
+        #propertyManagementItemModal .modal-content {
+            width: 400px;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid #E2E8F0;
+        }
+
+        #propertyManagementItemModal .modal-header {
+            display: flex;
+            align-items: center;
+            padding: 24px 36px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        #propertyManagementItemModal .modal-icon {
+            font-size: 24px;
+            margin-right: 12px;
+        }
+
+        #propertyManagementItemModal h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        #propertyManagementItemModal .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: white;
+            padding: 0;
+            line-height: 1;
+        }
+
+        #propertyManagementItemModal .modal-close:hover {
+            color: #E0E7FF;
+        }
+
+        #propertyManagementItemModal .form-group {
+            margin-bottom: 16px;
+        }
+
+        #propertyManagementItemModal .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 500;
+            color: #1E293B;
+            font-size: 12px;
+            width: 80%;
+            margin: 0 auto 4px;
+        }
+
+        #propertyManagementItemModal .form-control {
+            width: 80%;
+            margin: 0 auto;
+            display: block;
+            padding: 8px 12px;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            font-size: 12px;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        #propertyManagementItemModal .form-control:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        #propertyManagementItemModal .modal-footer {
+            background-color: white;
+            padding: 0 36px 24px;
+            border-top: none;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        #propertyManagementItemModal .btn {
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+            min-width: 80px;
+        }
+
+        #propertyManagementItemModal .btn-secondary {
+            background-color: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+
+        #propertyManagementItemModal .btn-secondary:hover {
+            background-color: #e2e8f0;
+        }
+
+        #propertyManagementItemModal .btn-primary {
+            background-color: #3B82F6;
+            color: white;
+            border: none;
+        }
+
+        #propertyManagementItemModal .btn-primary:hover {
+            background-color: #2563EB;
+        }
+
+        /* 电梯管理费项目模态框样式 */
+        #elevatorManagementItemModal .modal-content {
+            width: 400px;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid #E2E8F0;
+        }
+
+        #elevatorManagementItemModal .modal-header {
+            display: flex;
+            align-items: center;
+            padding: 24px 36px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        #elevatorManagementItemModal .modal-icon {
+            font-size: 24px;
+            margin-right: 12px;
+        }
+
+        #elevatorManagementItemModal h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        #elevatorManagementItemModal .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: white;
+            padding: 0;
+            line-height: 1;
+        }
+
+        #elevatorManagementItemModal .modal-close:hover {
+            color: #E0E7FF;
+        }
+
+        #elevatorManagementItemModal .form-group {
+            margin-bottom: 16px;
+        }
+
+        #elevatorManagementItemModal .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 500;
+            color: #1E293B;
+            font-size: 12px;
+            width: 80%;
+            margin: 0 auto 4px;
+        }
+
+        #elevatorManagementItemModal .form-control {
+            width: 80%;
+            margin: 0 auto;
+            display: block;
+            padding: 8px 12px;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            font-size: 12px;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        #elevatorManagementItemModal .form-control:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        #elevatorManagementItemModal .modal-footer {
+            background-color: white;
+            padding: 0 36px 24px;
+            border-top: none;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        #elevatorManagementItemModal .btn {
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+            min-width: 80px;
+        }
+
+        #elevatorManagementItemModal .btn-secondary {
+            background-color: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+
+        #elevatorManagementItemModal .btn-secondary:hover {
+            background-color: #e2e8f0;
+        }
+
+        #elevatorManagementItemModal .btn-primary {
+            background-color: #3B82F6;
+            color: white;
+            border: none;
+        }
+
+        #elevatorManagementItemModal .btn-primary:hover {
+            background-color: #2563EB;
+        }
     </style>
     <div id="feeModal" class="modal">
         <div class="modal-content">
@@ -299,6 +547,52 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeFeeModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="propertyManagementItemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon">📋</div>
+                <h3 id="propertyManagementItemModalTitle">添加物业管理费项目</h3>
+                <button class="modal-close" onclick="closePropertyManagementItemModal()">×</button>
+            </div>
+            <form id="propertyManagementItemForm">
+                <input type="hidden" id="propertyManagementItemId">
+                <div class="form-group">
+                    <label>描述</label>
+                    <input type="text" id="propertyManagementItemDescription" class="form-control" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closePropertyManagementItemModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="elevatorManagementItemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon">🏢</div>
+                <h3 id="elevatorManagementItemModalTitle">添加电梯管理费项目</h3>
+                <button class="modal-close" onclick="closeElevatorManagementItemModal()">×</button>
+            </div>
+            <form id="elevatorManagementItemForm">
+                <input type="hidden" id="elevatorManagementItemId">
+                <div class="form-group">
+                    <label>描述</label>
+                    <input type="text" id="elevatorManagementItemDescription" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>金额 (元)</label>
+                    <input type="number" id="elevatorManagementItemAmount" class="form-control" step="0.01" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeElevatorManagementItemModal()">取消</button>
                     <button type="submit" class="btn btn-primary">保存</button>
                 </div>
             </form>

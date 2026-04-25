@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-const PORT = 3000;
+const PORT = 3001;
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -24,7 +24,7 @@ if (!fs.existsSync(dataDir)) {
 let db = null;
 
 async function initDB() {
-    const initSqlJs = require('sql.js');
+    const initSqlJs = require('sql.js').default;
     const SQL = await initSqlJs();
 
     if (fs.existsSync(dbPath)) {
@@ -122,14 +122,41 @@ async function initDB() {
         )
     `);
 
-    // 创建物业费表
+    // 创建物业费年份表
     db.run(`
-        CREATE TABLE IF NOT EXISTS property_fees (
+        CREATE TABLE IF NOT EXISTS property_years (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            year TEXT NOT NULL UNIQUE,
+            createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // 初始化当前年份到物业费年份表
+    try {
+        const currentYear = new Date().getFullYear().toString();
+        const existingYear = db.exec("SELECT * FROM property_years WHERE year = '" + currentYear + "'");
+        if (!existingYear || existingYear.length === 0) {
+            db.run("INSERT INTO property_years (year) VALUES (?)", [currentYear]);
+        }
+    } catch (e) {
+        console.log('初始化年份数据失败:', e.message);
+    }
+
+    // 创建物业楼层基础费表
+    db.run(`
+        CREATE TABLE IF NOT EXISTS property_building_base_fees (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             description TEXT NOT NULL,
             amount REAL NOT NULL
         )
     `);
+
+    // 检查并添加year字段（如果不存在）
+    try {
+        const yearCheck = db.exec("SELECT year FROM property_building_base_fees LIMIT 1");
+    } catch (e) {
+        db.run("ALTER TABLE property_building_base_fees ADD COLUMN year TEXT");
+    }
 
     // 创建卫生费表
     db.run(`
@@ -158,9 +185,26 @@ async function initDB() {
         )
     `);
 
-    // 创建水费表
+    // 创建物业管理费项目表
     db.run(`
-        CREATE TABLE IF NOT EXISTS water_fees (
+        CREATE TABLE IF NOT EXISTS property_Mag (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            description TEXT NOT NULL,
+            amount REAL NOT NULL
+        )
+    `);
+
+    // 创建物业管理费项目数据表（只有ID和描述，无金额）
+    db.run(`
+        CREATE TABLE IF NOT EXISTS property_management_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            description TEXT NOT NULL
+        )
+    `);
+
+    // 创建电梯管理费项目数据表（有ID、描述和金额）
+    db.run(`
+        CREATE TABLE IF NOT EXISTS elevator_management_items (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             description TEXT NOT NULL,
             amount REAL NOT NULL
@@ -299,7 +343,7 @@ app.get('/api/fee-categories', (req, res) => {
 
 app.get('/api/property-fees', (req, res) => {
     try {
-        const results = db.exec("SELECT * FROM property_fees ORDER BY id");
+        const results = db.exec("SELECT * FROM property_building_base_fees ORDER BY id");
         if (results.length > 0) {
             const columns = results[0].columns;
             const values = results[0].values;
@@ -319,14 +363,88 @@ app.get('/api/property-fees', (req, res) => {
 
 app.post('/api/property-fees', (req, res) => {
     const { description, amount } = req.body;
-    db.run("INSERT INTO property_fees (description, amount) VALUES (?, ?)", [description, amount]);
+    db.run("INSERT INTO property_building_base_fees (description, amount) VALUES (?, ?)", [description, amount]);
     saveDB();
     res.json({ success: true });
 });
 
+app.put('/api/property-fees/:id', (req, res) => {
+    const { id } = req.params;
+    const { description, amount } = req.body;
+    db.run("UPDATE property_building_base_fees SET description = ?, amount = ? WHERE id = ?", [description, amount, id]);
+    saveDB();
+    res.json({ success: true });
+});
+
+app.get('/api/property-fees-years', (req, res) => {
+    try {
+        const results = db.exec("SELECT * FROM property_years ORDER BY year DESC");
+        if (results.length > 0) {
+            const columns = results[0].columns;
+            const values = results[0].values;
+            const years = values.map(row => {
+                const obj = {};
+                columns.forEach((col, i) => obj[col] = row[i]);
+                return obj;
+            });
+            res.json({ success: true, data: years });
+        } else {
+            res.json({ success: true, data: [] });
+        }
+    } catch (err) {
+        if (err.message.includes('no such table')) {
+            db.run(`
+                CREATE TABLE IF NOT EXISTS property_years (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    year TEXT NOT NULL UNIQUE,
+                    createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+            db.run("INSERT INTO property_years (year) VALUES (?)", [new Date().getFullYear().toString()]);
+            saveDB();
+            res.json({ success: true, data: [{ id: 1, year: new Date().getFullYear().toString() }] });
+        } else {
+            res.status(500).json({ success: false, message: err.message });
+        }
+    }
+});
+
+app.post('/api/property-fees-years', (req, res) => {
+    const { year } = req.body;
+    try {
+        db.run(`
+            CREATE TABLE IF NOT EXISTS property_years (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                year TEXT NOT NULL UNIQUE,
+                createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        db.run("INSERT INTO property_years (year) VALUES (?)", [year]);
+        saveDB();
+        res.json({ success: true, message: '年份添加成功' });
+    } catch (err) {
+        if (err.message.includes('UNIQUE')) {
+            res.status(400).json({ success: false, message: '该年份已存在' });
+        } else {
+            res.status(500).json({ success: false, message: err.message });
+        }
+    }
+});
+
+app.delete('/api/property-fees-years/:year', (req, res) => {
+    const { year } = req.params;
+    try {
+        db.run("DELETE FROM property_years WHERE year = ?", [year]);
+        saveDB();
+        res.json({ success: true, message: '年份删除成功' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
 app.delete('/api/property-fees/:id', (req, res) => {
     const { id } = req.params;
-    db.run("DELETE FROM property_fees WHERE id = ?", [id]);
+    db.run("DELETE FROM property_building_base_fees WHERE id = ?", [id]);
     saveDB();
     res.json({ success: true });
 });
@@ -465,6 +583,104 @@ app.delete('/api/other-fees/:id', (req, res) => {
     db.run("DELETE FROM other_fees WHERE id = ?", [id]);
     saveDB();
     res.json({ success: true });
+});
+
+// 物业管理费项目增删改查 API
+app.get('/api/property-management-items', (req, res) => {
+    try {
+        const results = db.exec("SELECT * FROM property_management_items ORDER BY id");
+        if (results.length > 0) {
+            const columns = results[0].columns;
+            const values = results[0].values;
+            const items = values.map(row => {
+                const obj = {};
+                columns.forEach((col, i) => obj[col] = row[i]);
+                return obj;
+            });
+            res.json({ success: true, data: items });
+        } else {
+            res.json({ success: true, data: [] });
+        }
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.post('/api/property-management-items', (req, res) => {
+    const { description } = req.body;
+    if (!description) {
+        return res.status(400).json({ success: false, message: '描述不能为空' });
+    }
+    db.run("INSERT INTO property_management_items (description) VALUES (?)", [description]);
+    saveDB();
+    res.json({ success: true, message: '添加成功' });
+});
+
+app.put('/api/property-management-items/:id', (req, res) => {
+    const { id } = req.params;
+    const { description } = req.body;
+    if (!description) {
+        return res.status(400).json({ success: false, message: '描述不能为空' });
+    }
+    db.run("UPDATE property_management_items SET description = ? WHERE id = ?", [description, id]);
+    saveDB();
+    res.json({ success: true, message: '更新成功' });
+});
+
+app.delete('/api/property-management-items/:id', (req, res) => {
+    const { id } = req.params;
+    db.run("DELETE FROM property_management_items WHERE id = ?", [id]);
+    saveDB();
+    res.json({ success: true, message: '删除成功' });
+});
+
+// 电梯管理费项目增删改查 API
+app.get('/api/elevator-management-items', (req, res) => {
+    try {
+        const results = db.exec("SELECT * FROM elevator_management_items ORDER BY id");
+        if (results.length > 0) {
+            const columns = results[0].columns;
+            const values = results[0].values;
+            const items = values.map(row => {
+                const obj = {};
+                columns.forEach((col, i) => obj[col] = row[i]);
+                return obj;
+            });
+            res.json({ success: true, data: items });
+        } else {
+            res.json({ success: true, data: [] });
+        }
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.post('/api/elevator-management-items', (req, res) => {
+    const { description, amount } = req.body;
+    if (!description || amount === undefined || amount === null || amount === '') {
+        return res.status(400).json({ success: false, message: '描述和金额不能为空' });
+    }
+    db.run("INSERT INTO elevator_management_items (description, amount) VALUES (?, ?)", [description, parseFloat(amount)]);
+    saveDB();
+    res.json({ success: true, message: '添加成功' });
+});
+
+app.put('/api/elevator-management-items/:id', (req, res) => {
+    const { id } = req.params;
+    const { description, amount } = req.body;
+    if (!description || amount === undefined || amount === null || amount === '') {
+        return res.status(400).json({ success: false, message: '描述和金额不能为空' });
+    }
+    db.run("UPDATE elevator_management_items SET description = ?, amount = ? WHERE id = ?", [description, parseFloat(amount), id]);
+    saveDB();
+    res.json({ success: true, message: '更新成功' });
+});
+
+app.delete('/api/elevator-management-items/:id', (req, res) => {
+    const { id } = req.params;
+    db.run("DELETE FROM elevator_management_items WHERE id = ?", [id]);
+    saveDB();
+    res.json({ success: true, message: '删除成功' });
 });
 
 app.get('/api/residents', (req, res) => {
@@ -765,7 +981,7 @@ app.get('/api/fees/:type', (req, res) => {
         
         switch (type) {
             case 'property':
-                tableName = 'property_fees';
+                tableName = 'property_building_base_fees';
                 break;
             case 'sanitation':
                 tableName = 'sanitation_fees';
@@ -776,8 +992,8 @@ app.get('/api/fees/:type', (req, res) => {
             case 'motorcycle':
                 tableName = 'motorcycle_fees';
                 break;
-            case 'water':
-                tableName = 'water_fees';
+            case 'property_management':
+                tableName = 'property_Mag';
                 break;
             case 'other':
                 tableName = 'other_fees';
@@ -812,7 +1028,7 @@ app.post('/api/fees/:type', (req, res) => {
         
         switch (type) {
             case 'property':
-                tableName = 'property_fees';
+                tableName = 'property_building_base_fees';
                 break;
             case 'sanitation':
                 tableName = 'sanitation_fees';
@@ -823,8 +1039,8 @@ app.post('/api/fees/:type', (req, res) => {
             case 'motorcycle':
                 tableName = 'motorcycle_fees';
                 break;
-            case 'water':
-                tableName = 'water_fees';
+            case 'property_management':
+                tableName = 'property_Mag';
                 break;
             case 'other':
                 tableName = 'other_fees';
@@ -849,7 +1065,7 @@ app.put('/api/fees/:type/:id', (req, res) => {
         
         switch (type) {
             case 'property':
-                tableName = 'property_fees';
+                tableName = 'property_building_base_fees';
                 break;
             case 'sanitation':
                 tableName = 'sanitation_fees';
@@ -860,8 +1076,8 @@ app.put('/api/fees/:type/:id', (req, res) => {
             case 'motorcycle':
                 tableName = 'motorcycle_fees';
                 break;
-            case 'water':
-                tableName = 'water_fees';
+            case 'property_management':
+                tableName = 'property_Mag';
                 break;
             case 'other':
                 tableName = 'other_fees';
@@ -885,7 +1101,7 @@ app.delete('/api/fees/:type/:id', (req, res) => {
         
         switch (type) {
             case 'property':
-                tableName = 'property_fees';
+                tableName = 'property_building_base_fees';
                 break;
             case 'sanitation':
                 tableName = 'sanitation_fees';
@@ -896,8 +1112,8 @@ app.delete('/api/fees/:type/:id', (req, res) => {
             case 'motorcycle':
                 tableName = 'motorcycle_fees';
                 break;
-            case 'water':
-                tableName = 'water_fees';
+            case 'property_management':
+                tableName = 'property_Mag';
                 break;
             case 'other':
                 tableName = 'other_fees';

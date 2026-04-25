@@ -1,14 +1,95 @@
 let allResidents = [];
+let selectedYear = new Date().getFullYear();
 
 document.addEventListener('DOMContentLoaded', async () => {
     await loadBuildingOptions();
     await loadAllResidents();
+    initYearSelector();
 
     const addButton = document.querySelector('.btn-primary');
     if (addButton) {
         addButton.addEventListener('click', showAddResidentModal);
     }
 });
+
+// 初始化年份选择器
+function initYearSelector() {
+    const currentYearElement = document.getElementById('currentYear');
+    if (currentYearElement) {
+        currentYearElement.textContent = selectedYear + '年';
+    }
+    generateYearOptions();
+}
+
+// 生成年份选项
+function generateYearOptions() {
+    const yearSelector = document.getElementById('yearSelector');
+    if (!yearSelector) return;
+    
+    const yearContainer = yearSelector.querySelector('div');
+    yearContainer.innerHTML = '';
+    
+    const currentYear = new Date().getFullYear();
+    
+    // 生成最近10年的选项
+    for (let year = currentYear + 5; year >= currentYear - 10; year--) {
+        const yearOption = document.createElement('div');
+        yearOption.style.padding = '8px 12px';
+        yearOption.style.cursor = 'pointer';
+        yearOption.style.borderBottom = '1px solid #f0f0f0';
+        yearOption.style.textAlign = 'center';
+        
+        if (year === selectedYear) {
+            yearOption.style.backgroundColor = '#e3f2fd';
+            yearOption.style.fontWeight = 'bold';
+        }
+        
+        yearOption.onmouseover = function() {
+            this.style.backgroundColor = '#f0f8ff';
+        };
+        
+        yearOption.onmouseout = function() {
+            if (year !== selectedYear) {
+                this.style.backgroundColor = 'white';
+            } else {
+                this.style.backgroundColor = '#e3f2fd';
+            }
+        };
+        
+        yearOption.onclick = function() {
+            selectYear(year);
+        };
+        
+        yearOption.textContent = year + '年';
+        yearContainer.appendChild(yearOption);
+    }
+}
+
+// 切换年份选择器显示/隐藏
+function toggleYearSelector() {
+    const yearSelector = document.getElementById('yearSelector');
+    if (yearSelector) {
+        yearSelector.style.display = yearSelector.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+// 选择年份
+function selectYear(year) {
+    selectedYear = year;
+    const currentYearElement = document.getElementById('currentYear');
+    if (currentYearElement) {
+        currentYearElement.textContent = year + '年';
+    }
+    
+    const yearSelector = document.getElementById('yearSelector');
+    if (yearSelector) {
+        yearSelector.style.display = 'none';
+    }
+    
+    generateYearOptions();
+    // 这里可以添加根据年份过滤数据的逻辑
+    // filterResidentsByYear(year);
+}
 
 function showAddResidentModal() {
     const modal = document.createElement('div');

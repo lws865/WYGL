@@ -194,14 +194,43 @@ function createTables() {
     } catch (e) {}
 
 
+    // 物业费年份表
+    db.run(`
+        CREATE TABLE IF NOT EXISTS property_years (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            year TEXT NOT NULL UNIQUE,
+            createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // 初始化当前年份到物业费年份表
+    try {
+        const currentYear = new Date().getFullYear().toString();
+        const existingYearResult = db.exec("SELECT * FROM property_years WHERE year = '" + currentYear + "'");
+        if (!existingYearResult || existingYearResult.length === 0) {
+            db.run("INSERT INTO property_years (year) VALUES (?)", [currentYear]);
+            console.log('初始化年份数据完成（年份：' + currentYear + '）');
+        }
+    } catch (e) {
+        console.log('初始化年份数据失败:', e.message);
+    }
+
     // 物业费数据表
     db.run(`
         CREATE TABLE IF NOT EXISTS property_fees (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             description TEXT NOT NULL,
-            amount REAL NOT NULL
+            amount REAL NOT NULL,
+            year TEXT
         )
     `);
+
+    // 检查并添加year字段（如果不存在）
+    try {
+        const yearCheck = db.exec("SELECT year FROM property_fees LIMIT 1");
+    } catch (e) {
+        db.run("ALTER TABLE property_fees ADD COLUMN year TEXT");
+    }
 
     // 卫生费数据表
     db.run(`
@@ -370,11 +399,12 @@ function initDefaultData() {
     // 检查物业费表是否为空
     try {
         const propertyFeesResult = db.exec("SELECT COUNT(*) as count FROM property_fees");
+        const currentYear = new Date().getFullYear().toString();
         if (propertyFeesResult && propertyFeesResult.length > 0 && propertyFeesResult[0].values && propertyFeesResult[0].values[0][0] === 0) {
-            db.run("INSERT INTO property_fees (description, amount) VALUES ('1至3层', 1)");
-            db.run("INSERT INTO property_fees (description, amount) VALUES ('4至6层', 1.5)");
-            db.run("INSERT INTO property_fees (description, amount) VALUES ('7层及以上', 2)");
-            console.log('默认物业费数据初始化完成');
+            db.run("INSERT INTO property_fees (description, amount, year) VALUES ('1至3层', 1, ?)", [currentYear]);
+            db.run("INSERT INTO property_fees (description, amount, year) VALUES ('4至6层', 1.5, ?)", [currentYear]);
+            db.run("INSERT INTO property_fees (description, amount, year) VALUES ('7层及以上', 2, ?)", [currentYear]);
+            console.log('默认物业费数据初始化完成（年份：' + currentYear + '）');
         }
     } catch (e) {
         console.error('检查物业费表出错:', e);
@@ -606,7 +636,8 @@ async function migrateFromLocalStorage() {
         if (propertyFees.length > 0) {
             db.run("DELETE FROM property_fees");
             propertyFees.forEach(f => {
-                db.run("INSERT INTO property_fees (id, description, amount) VALUES (?, ?, ?)", [f.id, f.description, f.amount]);
+                const year = f.year || new Date().getFullYear().toString();
+                db.run("INSERT INTO property_fees (id, description, amount, year) VALUES (?, ?, ?, ?)", [f.id, f.description, f.amount, year]);
             });
             console.log(`迁移了 ${propertyFees.length} 条物业费数据`);
         }
