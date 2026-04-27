@@ -196,6 +196,20 @@ async function handleFeeSubTypeChange() {
                 if (elevatorItem.amount == 0) {
                     console.log('电梯管理费项目金额为0，使用物业楼层基础费计算');
                     
+                    // 数量输入框填写12（月）
+                    const feeQuantity = document.getElementById('feeQuantity');
+                    if (feeQuantity) {
+                        feeQuantity.value = 12;
+                        console.log('电梯费数量已设置为12');
+                    }
+                    
+                    // 单位设置为月
+                    const feeUnit = document.getElementById('feeUnit');
+                    if (feeUnit) {
+                        feeUnit.value = '月';
+                        console.log('电梯费单位已设置为月');
+                    }
+                    
                     // 使用物业楼层基础费计算
                     if (currentResident.floorNumber && currentResident.area) {
                         const floorNumber = parseInt(currentResident.floorNumber.toString());
@@ -261,7 +275,13 @@ async function handleFeeSubTypeChange() {
                                         console.log('单价已设置:', feeUnitPrice.value);
                                     }
                                     
-                                    updateFeeAmount();
+                                    // 更新金额
+                                    const totalAmount = unitPrice * 12;
+                                    const amountInput = document.getElementById('feeAmount');
+                                    if (amountInput) {
+                                        amountInput.value = totalAmount.toFixed(2);
+                                        console.log('电梯费金额已设置:', totalAmount.toFixed(2));
+                                    }
                                 } else {
                                     console.log('没有找到匹配的物业楼层基础费或金额不大于0');
                                 }
@@ -442,6 +462,84 @@ async function handleFeeSubTypeChange() {
                 }
             }
         }
+    }
+
+    // 如果选择的是其他费用，自动填写数量、单价、单位和金额
+    if (feeType === 'other' && feeSubType) {
+        // 检查收费模式，只有自动模式才自动填写
+        const feeMode = document.getElementById('feeMode');
+        const currentMode = feeMode ? feeMode.value : 'auto';
+        
+        if (currentMode === 'auto') {
+            console.log('开始处理其他费用（自动模式）');
+
+            // 先获取其他费用项目的数据
+            const otherItemsResult = await getFees('other');
+            console.log('其他费用项目数据:', otherItemsResult);
+            
+            if (otherItemsResult.success) {
+                const otherItem = otherItemsResult.data.find(item => item.description === feeSubType);
+                
+                if (otherItem) {
+                    console.log('找到的其他费用项目:', otherItem);
+                    
+                    // 数量输入框填写1
+                    const feeQuantity = document.getElementById('feeQuantity');
+                    if (feeQuantity) {
+                        feeQuantity.value = 1;
+                        console.log('其他费用数量已设置为1');
+                    }
+                    
+                    // 单价填写其他费用项目的金额
+                    const feeUnitPrice = document.getElementById('feeUnitPrice');
+                    if (feeUnitPrice) {
+                        feeUnitPrice.value = otherItem.amount.toFixed(2);
+                        console.log('其他费用单价已设置:', otherItem.amount.toFixed(2));
+                    }
+                    
+                    // 单位设置为次
+                    const feeUnit = document.getElementById('feeUnit');
+                    if (feeUnit) {
+                        feeUnit.value = '次';
+                        console.log('其他费用单位已设置为次');
+                    }
+                    
+                    // 金额输入框自动填写数量乘单价的结果
+                    const totalAmount = otherItem.amount * 1;
+                    const amountInput = document.getElementById('feeAmount');
+                    if (amountInput) {
+                        amountInput.value = totalAmount.toFixed(2);
+                        console.log('其他费用金额已设置:', totalAmount.toFixed(2));
+                    }
+                }
+            }
+        } else {
+            console.log('当前为手动模式，跳过自动填写');
+        }
+    }
+}
+
+// 处理收费模式切换（自动/手动）
+function handleFeeModeChange() {
+    const feeMode = document.getElementById('feeMode').value;
+    const feeUnitPrice = document.getElementById('feeUnitPrice');
+    const feeAmount = document.getElementById('feeAmount');
+    
+    console.log('收费模式已切换:', feeMode);
+    
+    if (feeMode === 'manual') {
+        // 手动模式：清空单价和金额，允许用户手动输入
+        if (feeUnitPrice) {
+            feeUnitPrice.value = '';
+            feeUnitPrice.disabled = false;
+        }
+        if (feeAmount) {
+            feeAmount.value = '';
+            feeAmount.disabled = false;
+        }
+    } else {
+        // 自动模式：重新触发子项选择逻辑，自动填充费用
+        handleFeeSubTypeChange();
     }
 }
 
@@ -956,8 +1054,32 @@ async function updateFeeSubTypeOptions() {
 
     feeSubTypeSelect.innerHTML = '<option value="">选择子项</option>';
 
-    if (amountInput) {
-        amountInput.value = '';
+    // 获取单价输入框
+    const feeUnitPrice = document.getElementById('feeUnitPrice');
+    
+    // 如果不是水费，清空数量、单位、单价和金额输入框
+    if (feeType !== 'water') {
+        if (feeQuantity) {
+            feeQuantity.value = '';
+        }
+        
+        const feeUnit = document.getElementById('feeUnit');
+        if (feeUnit) {
+            feeUnit.value = '';
+        }
+        
+        if (feeUnitPrice) {
+            feeUnitPrice.value = '';
+        }
+        
+        if (amountInput) {
+            amountInput.value = '';
+        }
+    } else {
+        // 如果是水费，只清空金额输入框
+        if (amountInput) {
+            amountInput.value = '';
+        }
     }
 
     if ((feeType === 'property' || feeType === 'sanitation' || feeType === 'elevator') && !currentResident) {
@@ -1024,9 +1146,20 @@ async function updateFeeSubTypeOptions() {
         }
     }
 
-    const feeModeGroup = document.getElementById('feeModeGroup');
-    if (feeModeGroup) {
-        feeModeGroup.style.display = feeType === 'other' ? 'block' : 'none';
+    const feeMode = document.getElementById('feeMode');
+    if (feeMode) {
+        console.log('feeMode元素存在:', feeMode);
+        if (feeType === 'other') {
+            console.log('选择了其他费用，显示feeMode下拉列表');
+            feeMode.style.display = 'block';
+            feeMode.value = 'auto';
+            console.log('feeMode已设置为auto');
+        } else {
+            console.log('不是其他费用，隐藏feeMode下拉列表');
+            feeMode.style.display = 'none';
+        }
+    } else {
+        console.error('feeMode元素不存在！');
     }
 
     if (feeType === 'water') {
@@ -1162,7 +1295,7 @@ async function updateFeeSubTypeOptions() {
             otherFees.forEach(fee => {
                 const amount = fee.amount || 0;
                 if (amount > 0) {
-                    feeSubTypeSelect.innerHTML += `<option value="${amount}">${fee.description}</option>`;
+                    feeSubTypeSelect.innerHTML += `<option value="${fee.description}">${fee.description}</option>`;
                 }
             });
         }

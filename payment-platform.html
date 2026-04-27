@@ -60,6 +60,10 @@
                                     <option value="water">水费</option>
                                     <option value="other">其他费用</option>
                                 </select>
+                                <select id="feeMode" class="form-control" style="display: none;" onchange="handleFeeModeChange()">
+                                    <option value="auto">自动</option>
+                                    <option value="manual">手动</option>
+                                </select>
                                 <select id="feeSubType" class="form-control" onchange="handleFeeSubTypeChange()">
                                     <option value="">收费细项</option>
                                 </select>
