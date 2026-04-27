@@ -981,7 +981,10 @@ app.get('/api/fees/:type', (req, res) => {
         
         switch (type) {
             case 'property':
-                tableName = 'property_building_base_fees';
+                tableName = 'property_management_items';
+                break;
+            case 'elevator':
+                tableName = 'elevator_management_items';
                 break;
             case 'sanitation':
                 tableName = 'sanitation_fees';

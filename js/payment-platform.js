@@ -8,6 +8,8 @@ let stairsCache = [];
 let floorsCache = [];
 let roomsCache = [];
 let residentsCache = [];
+// 标志：防止搜索函数被重复调用
+let isUpdatingResident = false;
 
 // 页面加载完成后初始化
 window.addEventListener('load', async function() {
@@ -140,9 +142,18 @@ async function loadResidentByRoom() {
         return;
     }
 
-    const resident = residentsCache.find(r => r.roomId == roomId);
+    console.log('选择的roomId:', roomId, typeof roomId);
+    console.log('residentsCache中的住户数量:', residentsCache.length);
+    
+    const resident = residentsCache.find(r => {
+        console.log('比较:', r.roomId, typeof r.roomId, 'vs', roomId, typeof roomId, '结果:', r.roomId == roomId);
+        return r.roomId == roomId;
+    });
+    
+    console.log('找到的住户:', resident);
 
     if (resident) {
+        console.log('住户详情:', resident);
         currentResident = resident;
         updateResidentInfo(resident);
         checkPaymentStatus(resident.id);
@@ -185,33 +196,31 @@ async function loadResidentByRoom() {
 
 // 更新住户信息
 function updateResidentInfo(resident) {
-    const buildingName = getBuildingName(resident.buildingId);
-    const stairName = getStairName(resident.stairId);
-    const floorName = getFloorName(resident.floorId);
-    const roomNumber = getRoomNumber(resident.roomId);
+    isUpdatingResident = true;
 
-    document.getElementById('residentBuilding').textContent = buildingName;
-    document.getElementById('residentStair').textContent = stairName;
-    document.getElementById('residentFloor').textContent = floorName;
-    document.getElementById('residentRoom').textContent = roomNumber;
-    document.getElementById('residentName').textContent = resident.name || '-';
-    document.getElementById('residentPhone').textContent = resident.phone || '-';
-    document.getElementById('residentArea').textContent = resident.area ? resident.area.toFixed(2) + '㎡' : '-';
-    document.getElementById('residentSearch').value = resident.name;
+    const nameEl = document.getElementById('residentName');
+    const phoneEl = document.getElementById('residentPhone');
+    const areaEl = document.getElementById('residentArea');
+    const searchEl = document.getElementById('residentSearch');
+
+    if (nameEl) nameEl.textContent = resident.name || '-';
+    if (phoneEl) phoneEl.textContent = resident.phone || '-';
+    if (areaEl) areaEl.textContent = resident.area ? resident.area.toFixed(2) + '㎡' : '-';
+    if (searchEl) {
+        searchEl.value = resident.name || '';
+    }
+
+    setTimeout(() => {
+        isUpdatingResident = false;
+    }, 100);
 }
 
 // 重置住户信息
 function resetResidentInfo() {
     currentResident = null;
-    document.getElementById('residentBuilding').textContent = '-';
-    document.getElementById('residentStair').textContent = '-';
-    document.getElementById('residentFloor').textContent = '-';
-    document.getElementById('residentRoom').textContent = '-';
     document.getElementById('residentName').textContent = '-';
     document.getElementById('residentPhone').textContent = '-';
     document.getElementById('residentArea').textContent = '-';
-    document.getElementById('propertyFeeStatus').textContent = '-';
-    document.getElementById('propertyFeeStatus').className = 'value';
 }
 
 // 辅助函数：获取楼号名称
@@ -240,40 +249,82 @@ function getRoomNumber(roomId) {
 
 // 搜索住户
 async function searchResidents() {
-    const searchTerm = document.getElementById('residentSearch').value.trim();
-    const searchResults = document.getElementById('searchResults');
-
-    if (searchTerm.length === 0) {
-        searchResults.classList.remove('show');
+    if (isUpdatingResident) {
+        console.log('正在更新住户信息，跳过搜索');
         return;
     }
 
-    const filteredResidents = residentsCache.filter(r => r.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    console.log('搜索函数被调用');
+    const searchInput = document.getElementById('residentSearch');
+    const searchResults = document.getElementById('searchResults');
 
-    if (filteredResidents.length === 0) {
-        searchResults.innerHTML = '<div class="no-result">无匹配结果</div>';
-    } else {
-        searchResults.innerHTML = filteredResidents.map(r =>
-            `<div class="search-item" onclick="selectResident(${r.id})">
-                <span class="resident-icon">👤</span>
-                <span class="resident-text">${r.name} - ${getRoomNumber(r.roomId)}</span>
-            </div>`
-        ).join('');
+    if (!searchInput || !searchResults) {
+        console.error('找不到搜索框或搜索结果容器');
+        return;
     }
 
-    searchResults.classList.add('show');
+    const searchTerm = searchInput.value.trim();
+
+    console.log('搜索词:', searchTerm);
+    console.log('住户缓存数量:', residentsCache.length);
+
+    if (searchTerm.length === 0) {
+        searchResults.classList.remove('show');
+        searchResults.style.display = 'none';
+        return;
+    }
+
+    try {
+        const filteredResidents = residentsCache.filter(r => {
+            if (!r.name) return false;
+            return r.name.toLowerCase().includes(searchTerm.toLowerCase());
+        });
+
+        console.log('过滤后的住户数量:', filteredResidents.length);
+
+        if (filteredResidents.length === 0) {
+            searchResults.innerHTML = '<div class="no-result">无匹配结果</div>';
+        } else {
+            searchResults.innerHTML = filteredResidents.map(r =>
+                `<div class="search-item" onclick="selectResident(${r.id})">
+                    <span class="resident-icon">👤</span>
+                    <span class="resident-text">${r.name} - ${getRoomNumber(r.roomId || '')}</span>
+                </div>`
+            ).join('');
+        }
+
+        searchResults.style.display = 'block';
+        searchResults.classList.add('show');
+        console.log('搜索结果已显示');
+    } catch (error) {
+        console.error('搜索过程中出错:', error);
+        searchResults.innerHTML = '<div class="no-result">搜索出错</div>';
+        searchResults.style.display = 'block';
+        searchResults.classList.add('show');
+    }
 }
 
 // 选择住户
 async function selectResident(residentId) {
+    console.log('选择住户被调用, ID:', residentId);
     const resident = residentsCache.find(r => r.id == residentId);
 
     if (resident) {
+        console.log('找到住户:', resident);
         currentResident = resident;
-        updateResidentInfo(resident);
-        checkPaymentStatus(resident.id);
 
-        document.getElementById('buildingSelect').value = resident.buildingId;
+        console.log('更新住户信息显示...');
+        updateResidentInfo(resident);
+        console.log('住户信息已更新');
+        console.log('住户姓名:', resident.name, '电话:', resident.phone, '面积:', resident.area);
+
+        try {
+            await checkPaymentStatus(resident.id);
+        } catch (error) {
+            console.error('检查缴费状态出错:', error);
+        }
+
+        document.getElementById('buildingSelect').value = resident.buildingId || '';
 
         const stairSelect = document.getElementById('stairSelect');
         stairSelect.innerHTML = '<option value="">选择梯号</option>';
@@ -281,7 +332,7 @@ async function selectResident(residentId) {
         filteredStairs.forEach(stair => {
             stairSelect.innerHTML += `<option value="${stair.id}">${stair.number}</option>`;
         });
-        stairSelect.value = resident.stairId;
+        stairSelect.value = resident.stairId || '';
 
         const floorSelect = document.getElementById('floorSelect');
         floorSelect.innerHTML = '<option value="">选择层号</option>';
@@ -289,7 +340,7 @@ async function selectResident(residentId) {
         filteredFloors.forEach(floor => {
             floorSelect.innerHTML += `<option value="${floor.id}">${floor.floorNumber}层</option>`;
         });
-        floorSelect.value = resident.floorId;
+        floorSelect.value = resident.floorId || '';
 
         const roomSelect = document.getElementById('roomSelect');
         roomSelect.innerHTML = '<option value="">选择房号</option>';
@@ -300,29 +351,49 @@ async function selectResident(residentId) {
                 roomSelect.innerHTML += `<option value="${room.id}">${room.roomNumber}</option>`;
             });
         }
-        roomSelect.value = resident.roomId;
+        roomSelect.value = resident.roomId || '';
 
-        updateFeeSubTypeOptions();
+        try {
+            await updateFeeSubTypeOptions();
+        } catch (error) {
+            console.error('更新费用子项出错:', error);
+        }
+    } else {
+        console.warn('未找到ID为', residentId, '的住户');
     }
 
-    document.getElementById('searchResults').classList.remove('show');
+    const searchResults = document.getElementById('searchResults');
+    searchResults.classList.remove('show');
+    searchResults.style.display = 'none';
+    searchResults.innerHTML = '';
+    console.log('搜索结果已关闭');
 }
 
 // 检查缴费状态
 async function checkPaymentStatus(residentId) {
+    console.log('检查缴费状态:', residentId);
     const year = document.getElementById('paymentYear').value;
-    const result = await getPayments();
-    const payments = result.success ? result.data.filter(p => p.residentId == residentId && p.year == year && p.feeType == 'property') : [];
+    
+    try {
+        const result = await getPayments();
+        const payments = result.success ? result.data.filter(p => p.residentId == residentId && p.year == year && p.feeType == 'property') : [];
 
-    const hasPaid = payments.length > 0;
+        const hasPaid = payments.length > 0;
 
-    const statusElement = document.getElementById('propertyFeeStatus');
-    if (hasPaid) {
-        statusElement.textContent = '已缴费';
-        statusElement.className = 'value paid';
-    } else {
-        statusElement.textContent = '未缴费';
-        statusElement.className = 'value unpaid';
+        const statusElement = document.getElementById('propertyFeeStatus');
+        if (statusElement) {
+            if (hasPaid) {
+                statusElement.textContent = '已缴费';
+                statusElement.className = 'value paid';
+            } else {
+                statusElement.textContent = '未缴费';
+                statusElement.className = 'value unpaid';
+            }
+        } else {
+            console.warn('未找到propertyFeeStatus元素');
+        }
+    } catch (error) {
+        console.error('检查缴费状态出错:', error);
     }
 }
 
@@ -396,28 +467,19 @@ function updateFeeAmount() {
 function getFeeTypeName(feeType) {
     const typeNames = {
         'property': '物业费',
+        'elevator': '电梯费',
         'sanitation': '卫生费',
         'car': '汽车停车费',
-        'motorcycle': '摩托停车费',
+        'motorcycle': '摩托车停车费',
         'water': '水费',
-        'other': '其他收入'
+        'other': '其他费用'
     };
     return typeNames[feeType] || feeType;
 }
 
 // 更新缴费分类选项
 async function updateFeeTypeOptions() {
-    const feeTypeSelect = document.getElementById('feeType');
-    const result = await getFeeCategories();
-
-    feeTypeSelect.innerHTML = '<option value="">选择缴费类型</option>';
-
-    if (result.success && result.data) {
-        result.data.forEach(category => {
-            feeTypeSelect.innerHTML += `<option value="${category.value}">${category.name}</option>`;
-        });
-    }
-
+    // 直接使用HTML中设置的选项，不覆盖
     updateFeeSubTypeOptions();
 }
 
@@ -434,7 +496,7 @@ async function updateFeeSubTypeOptions() {
         amountInput.value = '';
     }
 
-    if ((feeType === 'property' || feeType === 'sanitation') && !currentResident) {
+    if ((feeType === 'property' || feeType === 'sanitation' || feeType === 'elevator') && !currentResident) {
         alert('请先选择住户');
         document.getElementById('feeType').value = '';
         document.getElementById('residentSearch').focus();
@@ -442,10 +504,16 @@ async function updateFeeSubTypeOptions() {
     }
 
     if (feeQuantity) {
-        if (feeType === 'property') {
+        if (feeType === 'property' || feeType === 'elevator') {
             feeQuantity.value = 12;
             feeQuantity.min = 1;
             feeQuantity.max = 12;
+            feeQuantity.disabled = false;
+            feeQuantity.style.backgroundColor = '';
+        } else if (feeType === 'sanitation' || feeType === 'car' || feeType === 'motorcycle') {
+            feeQuantity.value = 1;
+            feeQuantity.min = 1;
+            feeQuantity.max = 1;
             feeQuantity.disabled = false;
             feeQuantity.style.backgroundColor = '';
         } else {
@@ -458,6 +526,10 @@ async function updateFeeSubTypeOptions() {
     const feeUnit = document.getElementById('feeUnit');
     if (feeUnit) {
         if (feeType === 'property') {
+            feeUnit.value = '月';
+            feeUnit.disabled = true;
+            feeUnit.style.backgroundColor = '#f0f0f0';
+        } else if (feeType === 'elevator') {
             feeUnit.value = '月';
             feeUnit.disabled = true;
             feeUnit.style.backgroundColor = '#f0f0f0';
@@ -511,8 +583,9 @@ async function updateFeeSubTypeOptions() {
     }
 
     if (feeType) {
-        const [propertyResult, carResult, motorcycleResult, sanitationResult, otherResult] = await Promise.all([
+        const [propertyResult, elevatorResult, carResult, motorcycleResult, sanitationResult, otherResult] = await Promise.all([
             getFees('property'),
+            getFees('elevator'),
             getFees('car'),
             getFees('motorcycle'),
             getFees('sanitation'),
@@ -522,6 +595,64 @@ async function updateFeeSubTypeOptions() {
         if (feeType === 'property') {
             const propertyFees = propertyResult.success ? propertyResult.data : [];
 
+            // 显示所有物业管理费项目
+            propertyFees.forEach(fee => {
+                const description = fee.description || '';
+                if (description) {
+                    feeSubTypeSelect.innerHTML += `<option value="${description}">${description}</option>`;
+                }
+            });
+
+            // 如果选择了住户，自动选择匹配楼层的项目
+            if (currentResident && currentResident.floorId && propertyFees.length > 0) {
+                const floor = floorsCache.find(f => f.id == currentResident.floorId);
+                if (floor) {
+                    const currentFloor = parseInt(floor.floorNumber.toString());
+                    const matchedFee = propertyFees.find(fee => {
+                        const description = fee.description || '';
+
+                        const rangeMatch1 = description.match(/(\d+)-(\d+)层/);
+                        if (rangeMatch1) {
+                            const startFloor = parseInt(rangeMatch1[1]);
+                            const endFloor = parseInt(rangeMatch1[2]);
+                            return currentFloor >= startFloor && currentFloor <= endFloor;
+                        }
+
+                        const rangeMatch2 = description.match(/(\d+)至(\d+)层/);
+                        if (rangeMatch2) {
+                            const startFloor = parseInt(rangeMatch2[1]);
+                            const endFloor = parseInt(rangeMatch2[2]);
+                            return currentFloor >= startFloor && currentFloor <= endFloor;
+                        }
+
+                        const aboveMatch = description.match(/(\d+)层及以上?/);
+                        if (aboveMatch) {
+                            const startFloor = parseInt(aboveMatch[1]);
+                            return currentFloor >= startFloor;
+                        }
+
+                        const belowMatch = description.match(/(\d+)层以下/);
+                        if (belowMatch) {
+                            const endFloor = parseInt(belowMatch[1]);
+                            return currentFloor <= endFloor;
+                        }
+
+                        const singleMatch = description.match(/^(\d+)层$/);
+                        if (singleMatch) {
+                            return parseInt(singleMatch[1]) === currentFloor;
+                        }
+
+                        return false;
+                    });
+
+                    if (matchedFee && matchedFee.description) {
+                        feeSubTypeSelect.value = matchedFee.description;
+                    }
+                }
+            }
+        } else if (feeType === 'elevator') {
+            const elevatorFees = elevatorResult.success ? elevatorResult.data : [];
+
             let floorNumber = '';
             if (currentResident && currentResident.floorId) {
                 const floor = floorsCache.find(f => f.id == currentResident.floorId);
@@ -530,9 +661,9 @@ async function updateFeeSubTypeOptions() {
                 }
             }
 
-            if (floorNumber && propertyFees.length > 0) {
+            if (floorNumber && elevatorFees.length > 0) {
                 const currentFloor = parseInt(floorNumber);
-                const matchedFee = propertyFees.find(fee => {
+                const matchedFee = elevatorFees.find(fee => {
                     const description = fee.description || '';
 
                     const rangeMatch1 = description.match(/(\d+)-(\d+)层/);
@@ -570,17 +701,17 @@ async function updateFeeSubTypeOptions() {
                 });
 
                 if (matchedFee && matchedFee.amount > 0) {
-                    feeSubTypeSelect.innerHTML += `<option value="${matchedFee.amount}">${matchedFee.amount}</option>`;
+                    feeSubTypeSelect.innerHTML += `<option value="${matchedFee.amount}">${matchedFee.description}</option>`;
                     feeSubTypeSelect.value = matchedFee.amount;
                     updateFeeAmount();
                     return;
                 }
             }
 
-            propertyFees.forEach(fee => {
+            elevatorFees.forEach(fee => {
                 const amount = fee.amount || 0;
                 if (amount > 0) {
-                    feeSubTypeSelect.innerHTML += `<option value="${amount}">${amount}</option>`;
+                    feeSubTypeSelect.innerHTML += `<option value="${amount}">${fee.description}</option>`;
                 }
             });
         } else if (feeType === 'car') {

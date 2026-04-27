@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>收费平台 - 汇泰物业管理系统</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/payment-platform.css">
 </head>
 <body>
     <div class="app-container">
@@ -19,8 +20,10 @@
                     <div class="payment-section">
                         <div class="section-header">住户信息</div>
                         <div class="section-body">
-                            <input type="text" id="residentSearch" class="form-control" placeholder="搜索住户..." oninput="searchResidents()">
-                            <div id="searchResults" class="search-results"></div>
+                            <div class="search-wrapper" style="position: relative; width: 100%;">
+                                <input type="text" id="residentSearch" class="form-control" placeholder="搜索住户..." oninput="searchResidents()">
+                                <div id="searchResults" class="search-results"></div>
+                            </div>
                             <div class="inline-group">
                                 <select id="buildingSelect" class="form-control" onchange="updateStairOptions()">
                                     <option value="">楼号</option>
@@ -50,11 +53,12 @@
                                 <select id="feeType" class="form-control" onchange="updateFeeSubTypeOptions(); updateFeeAmount();">
                                     <option value="">收费分类</option>
                                     <option value="property">物业费</option>
-                                    <option value="car">汽车停车费</option>
-                                    <option value="motorcycle">摩托停车费</option>
+                                    <option value="elevator">电梯费</option>
                                     <option value="sanitation">卫生费</option>
+                                    <option value="car">汽车停车费</option>
+                                    <option value="motorcycle">摩托车停车费</option>
                                     <option value="water">水费</option>
-                                    <option value="other">其他收入</option>
+                                    <option value="other">其他费用</option>
                                 </select>
                                 <select id="feeSubType" class="form-control">
                                     <option value="">收费细项</option>
