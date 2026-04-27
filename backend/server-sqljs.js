@@ -780,6 +780,27 @@ app.get('/api/health', (req, res) => {
     res.json({ success: true, message: '服务器运行正常' });
 });
 
+// 获取物业楼层基础费（用于根据层号计算费用）
+app.get('/api/property-building-fees', (req, res) => {
+    try {
+        const results = db.exec("SELECT * FROM property_building_base_fees ORDER BY id");
+        if (results.length > 0) {
+            const columns = results[0].columns;
+            const values = results[0].values;
+            const fees = values.map(row => {
+                const obj = {};
+                columns.forEach((col, i) => obj[col] = row[i]);
+                return obj;
+            });
+            res.json({ success: true, data: fees });
+        } else {
+            res.json({ success: true, data: [] });
+        }
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
 // ==================== 梯号相关API ====================
 
 app.get('/api/stairs', (req, res) => {
@@ -1031,7 +1052,7 @@ app.post('/api/fees/:type', (req, res) => {
         
         switch (type) {
             case 'property':
-                tableName = 'property_building_base_fees';
+                tableName = 'property_management_items';
                 break;
             case 'sanitation':
                 tableName = 'sanitation_fees';
@@ -1068,7 +1089,7 @@ app.put('/api/fees/:type/:id', (req, res) => {
         
         switch (type) {
             case 'property':
-                tableName = 'property_building_base_fees';
+                tableName = 'property_management_items';
                 break;
             case 'sanitation':
                 tableName = 'sanitation_fees';
@@ -1104,7 +1125,7 @@ app.delete('/api/fees/:type/:id', (req, res) => {
         
         switch (type) {
             case 'property':
-                tableName = 'property_building_base_fees';
+                tableName = 'property_management_items';
                 break;
             case 'sanitation':
                 tableName = 'sanitation_fees';

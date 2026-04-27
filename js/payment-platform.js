@@ -11,6 +11,97 @@ let residentsCache = [];
 // 标志：防止搜索函数被重复调用
 let isUpdatingResident = false;
 
+// 测试物业费计算
+async function testPropertyFeeCalculation() {
+    console.log('========== 开始测试物业费计算 ==========');
+    
+    console.log('1. 测试getPropertyBuildingFees API...');
+    const result = await getPropertyBuildingFees();
+    console.log('API返回结果:', result);
+    
+    if (result.success) {
+        console.log('API调用成功，数据:', result.data);
+        
+        // 测试匹配逻辑
+        const testFloors = [3, 5, 8, 10];
+        testFloors.forEach(floorNum => {
+            console.log(`\n测试楼层 ${floorNum}:`);
+            const matchedFee = result.data.find(fee => {
+                const description = fee.description || '';
+                
+                const rangeMatch1 = description.match(/(\d+)-(\d+)层/);
+                if (rangeMatch1) {
+                    const startFloor = parseInt(rangeMatch1[1]);
+                    const endFloor = parseInt(rangeMatch1[2]);
+                    const match = floorNum >= startFloor && floorNum <= endFloor;
+                    console.log(`  范围匹配1 ${startFloor}-${endFloor}层:`, match ? '✓' : '✗');
+                    return match;
+                }
+
+                const rangeMatch2 = description.match(/(\d+)至(\d+)层/);
+                if (rangeMatch2) {
+                    const startFloor = parseInt(rangeMatch2[1]);
+                    const endFloor = parseInt(rangeMatch2[2]);
+                    const match = floorNum >= startFloor && floorNum <= endFloor;
+                    console.log(`  范围匹配2 ${startFloor}至${endFloor}层:`, match ? '✓' : '✗');
+                    return match;
+                }
+
+                const aboveMatch = description.match(/(\d+)层及以上?/);
+                if (aboveMatch) {
+                    const startFloor = parseInt(aboveMatch[1]);
+                    const match = floorNum >= startFloor;
+                    console.log(`  以上匹配 ${startFloor}层及以上:`, match ? '✓' : '✗');
+                    return match;
+                }
+
+                const belowMatch = description.match(/(\d+)层以下/);
+                if (belowMatch) {
+                    const endFloor = parseInt(belowMatch[1]);
+                    const match = floorNum <= endFloor;
+                    console.log(`  以下匹配 ${endFloor}层以下:`, match ? '✓' : '✗');
+                    return match;
+                }
+
+                const singleMatch = description.match(/^(\d+)层$/);
+                if (singleMatch) {
+                    const match = parseInt(singleMatch[1]) === floorNum;
+                    console.log(`  单层匹配 ${parseInt(singleMatch[1])}层:`, match ? '✓' : '✗');
+                    return match;
+                }
+
+                return false;
+            });
+            
+            if (matchedFee) {
+                console.log(`  ✓ 匹配成功: ${matchedFee.description}, 金额: ${matchedFee.amount}`);
+            } else {
+                console.log(`  ✗ 未找到匹配的费用`);
+            }
+        });
+    } else {
+        console.log('API调用失败:', result.message);
+    }
+    
+    console.log('\n========== 测试结束 ==========');
+}
+
+// 快速测试API
+async function testAPI() {
+    console.log('========== 快速测试API ==========');
+    try {
+        const response = await fetch('http://localhost:3001/api/property-building-fees');
+        console.log('HTTP响应状态:', response.status);
+        const text = await response.text();
+        console.log('响应文本:', text);
+        const data = JSON.parse(text);
+        console.log('解析后的数据:', data);
+    } catch (error) {
+        console.error('测试API失败:', error);
+    }
+    console.log('========== 测试结束 ==========');
+}
+
 // 页面加载完成后初始化
 window.addEventListener('load', async function() {
     // 预加载数据
@@ -196,6 +287,7 @@ async function loadResidentByRoom() {
 
 // 更新住户信息
 function updateResidentInfo(resident) {
+    console.log('更新住户信息，完整住户对象:', resident);
     isUpdatingResident = true;
 
     const nameEl = document.getElementById('residentName');
@@ -438,9 +530,10 @@ function updateFeeAmount() {
 
     switch (feeType) {
         case 'property':
-            if (unitPrice > 0 && currentResident) {
-                const area = currentResident.area || 0;
-                const totalAmount = unitPrice * area * quantity;
+            if (unitPrice > 0) {
+                // 对于物业费，单价输入框已经是 金额 * 面积 的结果
+                // 所以直接乘以数量（月数）
+                const totalAmount = unitPrice * quantity;
                 amountInput.value = totalAmount.toFixed(2);
             } else {
                 amountInput.value = '';
@@ -485,7 +578,13 @@ async function updateFeeTypeOptions() {
 
 // 更新缴费子项选项
 async function updateFeeSubTypeOptions() {
+    console.log('=====================================');
+    console.log('updateFeeSubTypeOptions 被调用');
     const feeType = document.getElementById('feeType').value;
+    console.log('当前选择的收费分类:', feeType);
+    console.log('当前住户:', currentResident);
+    console.log('楼层缓存:', floorsCache);
+    console.log('=====================================');
     const feeSubTypeSelect = document.getElementById('feeSubType');
     const feeQuantity = document.getElementById('feeQuantity');
     const amountInput = document.getElementById('feeAmount');
@@ -595,7 +694,7 @@ async function updateFeeSubTypeOptions() {
         if (feeType === 'property') {
             const propertyFees = propertyResult.success ? propertyResult.data : [];
 
-            // 显示所有物业管理费项目
+            // 显示所有物业管理费项目（从property_management_items表）
             propertyFees.forEach(fee => {
                 const description = fee.description || '';
                 if (description) {
@@ -603,52 +702,106 @@ async function updateFeeSubTypeOptions() {
                 }
             });
 
-            // 如果选择了住户，自动选择匹配楼层的项目
-            if (currentResident && currentResident.floorId && propertyFees.length > 0) {
-                const floor = floorsCache.find(f => f.id == currentResident.floorId);
-                if (floor) {
-                    const currentFloor = parseInt(floor.floorNumber.toString());
-                    const matchedFee = propertyFees.find(fee => {
-                        const description = fee.description || '';
+            // 如果有项目，默认选择第一个
+            if (propertyFees.length > 0 && propertyFees[0].description) {
+                feeSubTypeSelect.value = propertyFees[0].description;
+            }
 
-                        const rangeMatch1 = description.match(/(\d+)-(\d+)层/);
-                        if (rangeMatch1) {
-                            const startFloor = parseInt(rangeMatch1[1]);
-                            const endFloor = parseInt(rangeMatch1[2]);
-                            return currentFloor >= startFloor && currentFloor <= endFloor;
+            // 如果选择了住户，根据层号自动计算单价
+            console.log('物业费处理 - currentResident:', currentResident);
+            console.log('物业费处理 - floorNumber:', currentResident?.floorNumber);
+            console.log('物业费处理 - area:', currentResident?.area);
+            if (currentResident && currentResident.floorNumber && currentResident.area) {
+                const floorNumber = parseInt(currentResident.floorNumber.toString());
+                console.log('物业费处理 - 当前楼层:', floorNumber);
+                if (floorNumber) {
+                    try {
+                        // 从property_building_base_fees表获取费用数据
+                        console.log('物业费处理 - 开始调用getPropertyBuildingFees');
+                        const buildingFeesResult = await getPropertyBuildingFees();
+                        console.log('物业费处理 - getPropertyBuildingFees返回结果:', buildingFeesResult);
+                        
+                        if (buildingFeesResult.success) {
+                            const buildingFees = buildingFeesResult.data;
+                            console.log('物业费处理 - 获取到的物业楼层基础费:', buildingFees);
+                            
+                            // 根据层号匹配费用
+                            const matchedFee = buildingFees.find(fee => {
+                                const description = fee.description || '';
+                                console.log('物业费处理 - 检查费用:', description);
+
+                                const rangeMatch1 = description.match(/(\d+)-(\d+)层/);
+                                if (rangeMatch1) {
+                                    const startFloor = parseInt(rangeMatch1[1]);
+                                    const endFloor = parseInt(rangeMatch1[2]);
+                                    const match = floorNumber >= startFloor && floorNumber <= endFloor;
+                                    console.log('物业费处理 - 范围匹配1:', startFloor, '-', endFloor, '匹配:', match);
+                                    return match;
+                                }
+
+                                const rangeMatch2 = description.match(/(\d+)至(\d+)层/);
+                                if (rangeMatch2) {
+                                    const startFloor = parseInt(rangeMatch2[1]);
+                                    const endFloor = parseInt(rangeMatch2[2]);
+                                    const match = floorNumber >= startFloor && floorNumber <= endFloor;
+                                    console.log('物业费处理 - 范围匹配2:', startFloor, '-', endFloor, '匹配:', match);
+                                    return match;
+                                }
+
+                                const aboveMatch = description.match(/(\d+)层及?以上?/);
+                                if (aboveMatch) {
+                                    const startFloor = parseInt(aboveMatch[1]);
+                                    const match = floorNumber >= startFloor;
+                                    console.log('物业费处理 - 以上匹配:', startFloor, '匹配:', match);
+                                    return match;
+                                }
+
+                                const belowMatch = description.match(/(\d+)层以下/);
+                                if (belowMatch) {
+                                    const endFloor = parseInt(belowMatch[1]);
+                                    const match = floorNumber <= endFloor;
+                                    console.log('物业费处理 - 以下匹配:', endFloor, '匹配:', match);
+                                    return match;
+                                }
+
+                                const singleMatch = description.match(/^(\d+)层$/);
+                                if (singleMatch) {
+                                    const match = parseInt(singleMatch[1]) === floorNumber;
+                                    console.log('物业费处理 - 单层匹配:', parseInt(singleMatch[1]), '匹配:', match);
+                                    return match;
+                                }
+
+                                return false;
+                            });
+
+                            console.log('物业费处理 - 匹配到的费用:', matchedFee);
+                            if (matchedFee && matchedFee.amount > 0) {
+                                // 计算单价：金额 * 面积
+                                const unitPrice = matchedFee.amount * currentResident.area;
+                                console.log('物业费处理 - 计算单价:', unitPrice);
+                                const feeUnitPrice = document.getElementById('feeUnitPrice');
+                                if (feeUnitPrice) {
+                                    feeUnitPrice.value = unitPrice.toFixed(2);
+                                    console.log('物业费处理 - 单价已设置:', feeUnitPrice.value);
+                                    // 更新费用金额
+                                    updateFeeAmount();
+                                }
+                            } else {
+                                console.log('物业费处理 - 没有找到匹配的费用或金额不大于0');
+                            }
                         }
-
-                        const rangeMatch2 = description.match(/(\d+)至(\d+)层/);
-                        if (rangeMatch2) {
-                            const startFloor = parseInt(rangeMatch2[1]);
-                            const endFloor = parseInt(rangeMatch2[2]);
-                            return currentFloor >= startFloor && currentFloor <= endFloor;
-                        }
-
-                        const aboveMatch = description.match(/(\d+)层及以上?/);
-                        if (aboveMatch) {
-                            const startFloor = parseInt(aboveMatch[1]);
-                            return currentFloor >= startFloor;
-                        }
-
-                        const belowMatch = description.match(/(\d+)层以下/);
-                        if (belowMatch) {
-                            const endFloor = parseInt(belowMatch[1]);
-                            return currentFloor <= endFloor;
-                        }
-
-                        const singleMatch = description.match(/^(\d+)层$/);
-                        if (singleMatch) {
-                            return parseInt(singleMatch[1]) === currentFloor;
-                        }
-
-                        return false;
-                    });
-
-                    if (matchedFee && matchedFee.description) {
-                        feeSubTypeSelect.value = matchedFee.description;
+                    } catch (err) {
+                        console.error('获取物业楼层基础费失败:', err);
                     }
+                } else {
+                    console.log('物业费处理 - 没有找到楼层信息');
                 }
+            } else {
+                console.log('物业费处理 - 缺少住户信息、floorNumber或area');
+                console.log('详细信息:');
+                console.log('currentResident:', currentResident);
+                console.log('currentResident.floorNumber:', currentResident?.floorNumber);
+                console.log('currentResident.area:', currentResident?.area);
             }
         } else if (feeType === 'elevator') {
             const elevatorFees = elevatorResult.success ? elevatorResult.data : [];

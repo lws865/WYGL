@@ -16,16 +16,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // 静态文件服务
 app.use(express.static(path.join(__dirname, '..')));
 
-// 数据库文件路径
-const dataDir = path.join(__dirname, '../data');
-const dbPath = path.join(dataDir, 'property_management.db');
+// 使用集中的数据库配置
+const dbConfig = require('./db-config');
+const dbPath = dbConfig.dbPath;
+const dataDir = dbConfig.dataDir;
 console.log('数据库文件路径:', dbPath);
 
-// 确保data目录存在
-if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-    console.log('✅ data目录创建成功');
-}
+// data目录的创建已经在db-config.js中处理
 
 // 创建数据库连接
 const db = new sqlite3.Database(dbPath, (err) => {

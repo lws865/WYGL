@@ -1,6 +1,15 @@
+// 跟踪收费平台页面是否已打开
+let paymentPlatformWindow = null;
+
 document.addEventListener('DOMContentLoaded', () => {
     checkLogin();
     loadUserInfo();
+    
+    // 绑定收费平台按钮点击事件
+    const paymentPlatformBtn = document.querySelector('button[onclick*="payment-platform.html"]');
+    if (paymentPlatformBtn) {
+        paymentPlatformBtn.onclick = openPaymentPlatform;
+    }
 });
 
 function checkLogin() {
@@ -17,6 +26,28 @@ function loadUserInfo() {
         document.getElementById('userName').textContent = user.username || '管理员';
         document.getElementById('userRole').textContent = user.role === 'admin' ? '系统管理员' : '普通用户';
     }
+}
+
+function openPaymentPlatform() {
+    // 检查收费平台页面是否已打开
+    if (paymentPlatformWindow && !paymentPlatformWindow.closed) {
+        // 页面已打开，提示用户
+        alert('收费平台页面已打开，请勿重复打开！');
+        // 聚焦到已打开的窗口
+        paymentPlatformWindow.focus();
+        return;
+    }
+    
+    // 打开新的收费平台页面
+    paymentPlatformWindow = window.open('payment-platform.html', '_blank');
+    
+    // 监听窗口关闭事件
+    const checkWindowClosed = setInterval(() => {
+        if (paymentPlatformWindow && paymentPlatformWindow.closed) {
+            paymentPlatformWindow = null;
+            clearInterval(checkWindowClosed);
+        }
+    }, 1000);
 }
 
 function showUserMenu() {

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>初始化数据库 - 物业管理系统</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        .message {
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🗄️ 物业管理费年份表初始化</h2>
+        <p>此工具用于初始化 property_years 表并插入基础年份数据。</p>
+
+        <div>
+            <button class="btn btn-primary" onclick="initPropertyYearsTable()">初始化年份表</button>
+            <button class="btn btn-success" onclick="addYear2026()">添加2026年份</button>
+            <button class="btn btn-danger" onclick="clearYears()">清空年份数据</button>
+        </div>
+
+        <div id="message" style="display: none;"></div>
+
+        <div style="margin-top: 30px;">
+            <h3>操作说明：</h3>
+            <ol>
+                <li>首先点击 <strong>"初始化年份表"</strong> 按钮创建 property_years 表</li>
+                <li>然后点击 <strong>"添加2026年份"</strong> 按钮插入2026年数据</li>
+                <li>完成后即可在费用管理页面使用年份功能</li>
+            </ol>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <h3>如果以上按钮无效，可以手动执行以下SQL：</h3>
+            <pre>
+-- 创建物业费年份表
+CREATE TABLE IF NOT EXISTS property_years (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    year TEXT NOT NULL UNIQUE,
+    createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 插入2026年份
+INSERT OR IGNORE INTO property_years (year) VALUES ('2026');
+            </pre>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3000/api';
+
+        function showMessage(text, type) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.style.display = 'block';
+            msgDiv.className = 'message ' + type;
+            msgDiv.innerHTML = text;
+        }
+
+        async function initPropertyYearsTable() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/init-property-years-table`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showMessage('✅ property_years 表创建成功！', 'success');
+                } else {
+                    showMessage('❌ 创建失败：' + result.message, 'error');
+                }
+            } catch (e) {
+                showMessage('❌ 请求失败：' + e.message, 'error');
+            }
+        }
+
+        async function addYear2026() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/property-fees-years`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ year: '2026' })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showMessage('✅ 2026年份添加成功！', 'success');
+                } else if (result.message && result.message.includes('已存在')) {
+                    showMessage('ℹ️ 2026年份已存在，无需重复添加', 'info');
+                } else {
+                    showMessage('❌ 添加失败：' + result.message, 'error');
+                }
+            } catch (e) {
+                showMessage('❌ 请求失败：' + e.message, 'error');
+            }
+        }
+
+        async function clearYears() {
+            if (!confirm('确定要清空所有年份数据吗？此操作不可恢复！')) {
+                return;
+            }
+            try {
+                const response = await fetch(`${API_BASE_URL}/init-property-years-table/clear`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showMessage('✅ 年份数据已清空！', 'success');
+                } else {
+                    showMessage('❌ 清空失败：' + result.message, 'error');
+                }
+            } catch (e) {
+                showMessage('❌ 请求失败：' + e.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

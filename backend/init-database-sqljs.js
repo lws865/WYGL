@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const dbDir = path.join(__dirname, '..', 'data');
-const dbPath = path.join(dbDir, 'property_management.db');
+const dbPath = path.join(dbDir, 'property_management.db'); // 使用用户指定的数据库
 
 console.log('='*50);
 console.log('物业管理系统 - SQLite数据库初始化');

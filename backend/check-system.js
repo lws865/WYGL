@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const dbPath = path.join(__dirname, '..', 'data', 'property_management.db');
+const dbPath = path.join(__dirname, '..', 'data', 'property_management.db'); // 使用用户指定的数据库
 
 console.log('=== 系统状态检查 ===');
 console.log('当前工作目录:', process.cwd());

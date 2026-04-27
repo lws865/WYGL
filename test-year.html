@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试年份保存功能</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 600px; margin: 50px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { color: #333; margin-bottom: 20px; }
+        .btn { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .message { padding: 15px; margin-top: 20px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .year-list { margin-top: 20px; }
+        .year-item { padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin: 5px 0; display: flex; justify-content: space-between; align-items: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🧪 测试年份保存功能</h2>
+        
+        <div>
+            <input type="number" id="yearInput" placeholder="输入年份" value="2026" min="2000" max="2100" style="padding: 10px; width: 200px; margin-right: 10px;">
+            <button class="btn btn-success" onclick="addYear()">添加年份</button>
+            <button class="btn btn-primary" onclick="getYears()">获取年份列表</button>
+            <button class="btn btn-danger" onclick="clearYears()">清空所有年份</button>
+        </div>
+        
+        <div id="message" style="display: none;"></div>
+        
+        <div class="year-list" id="yearList">
+            <!-- 年份列表将在这里显示 -->
+        </div>
+    </div>
+
+    <script>
+        function showMessage(text, type) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.style.display = 'block';
+            msgDiv.className = 'message ' + type;
+            msgDiv.innerHTML = text;
+        }
+
+        async function addYear() {
+            const year = document.getElementById('yearInput').value;
+            if (!year) {
+                showMessage('请输入年份', 'error');
+                return;
+            }
+
+            // 模拟 API 调用
+            const result = await addPropertyFeeYear(year);
+            if (result.success) {
+                showMessage(`✅ 年份 ${year} 添加成功！`, 'success');
+                await getYears();
+            } else {
+                showMessage(`❌ 添加失败：${result.message}`, 'error');
+            }
+        }
+
+        async function getYears() {
+            const result = await getPropertyFeeYears();
+            if (result.success) {
+                const yearList = document.getElementById('yearList');
+                if (result.data.length === 0) {
+                    yearList.innerHTML = '<p>暂无年份数据</p>';
+                } else {
+                    yearList.innerHTML = result.data.map(item => 
+                        `<div class="year-item">
+                            ${item.year}
+                            <button class="btn btn-danger" onclick="deleteYear('${item.year}')">删除</button>
+                        </div>`
+                    ).join('');
+                }
+                showMessage(`✅ 获取到 ${result.data.length} 个年份`, 'success');
+            } else {
+                showMessage(`❌ 获取失败：${result.message}`, 'error');
+            }
+        }
+
+        async function deleteYear(year) {
+            const result = await deletePropertyFeeYear(year);
+            if (result.success) {
+                showMessage(`✅ 年份 ${year} 删除成功！`, 'success');
+                await getYears();
+            } else {
+                showMessage(`❌ 删除失败：${result.message}`, 'error');
+            }
+        }
+
+        function clearYears() {
+            localStorage.removeItem('propertyYears');
+            showMessage('✅ 所有年份已清空', 'success');
+            document.getElementById('yearList').innerHTML = '<p>暂无年份数据</p>';
+        }
+
+        // 模拟 API 函数
+        async function addPropertyFeeYear(year) {
+            // 保存到本地存储
+            const existingYears = JSON.parse(localStorage.getItem('propertyYears') || '[]');
+            if (!existingYears.includes(year)) {
+                existingYears.push(year);
+                localStorage.setItem('propertyYears', JSON.stringify(existingYears));
+            }
+            return { success: true, message: '年份添加成功' };
+        }
+
+        async function getPropertyFeeYears() {
+            // 从本地存储获取年份
+            const years = JSON.parse(localStorage.getItem('propertyYears') || '[]');
+            return { success: true, data: years.map(year => ({ year })) };
+        }
+
+        async function deletePropertyFeeYear(year) {
+            // 从本地存储删除年份
+            const existingYears = JSON.parse(localStorage.getItem('propertyYears') || '[]');
+            const newYears = existingYears.filter(y => y !== year);
+            localStorage.setItem('propertyYears', JSON.stringify(newYears));
+            return { success: true, message: '年份删除成功' };
+        }
+
+        // 页面加载时获取年份列表
+        window.onload = getYears;
+    </script>
+</body>
+</html>

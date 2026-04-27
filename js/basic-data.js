@@ -1,13 +1,24 @@
 let currentDeleteId = null;
 let currentDeleteType = null;
 
-window.addEventListener('load', async function() {
-    if (!checkLogin()) return;
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('DOM内容加载完成，开始初始化基础数据页面');
+    if (!checkLogin()) {
+        console.log('未登录，跳转到登录页面');
+        return;
+    }
+    console.log('登录状态验证通过，开始加载数据');
     await loadAllFees();
+    console.log('数据加载完成，初始化表单事件');
     initFormEvents();
 });
 
-
+document.addEventListener('visibilitychange', async function() {
+    if (document.visibilityState === 'visible') {
+        console.log('页面重新获得焦点，重新加载数据');
+        await loadAllFees();
+    }
+});
 
 function checkLogin() {
     const currentUser = localStorage.getItem('user');
@@ -24,19 +35,34 @@ function logout() {
 }
 
 async function loadAllFees() {
-    await loadFeesByType('property', 'propertyTableBody');
-    await loadFeesByType('sanitation', 'sanitationTableBody');
-    await loadFeesByType('car', 'carTableBody');
-    await loadFeesByType('motorcycle', 'motorcycleTableBody');
-    await loadFeesByType('other', 'otherTableBody');
-    await loadPropertyManagementItems();
-    await loadElevatorManagementItems();
+    try {
+        console.log('开始加载物业楼层基础费数据');
+        await loadFeesByType('property', 'propertyTableBody');
+        console.log('开始加载卫生费数据');
+        await loadFeesByType('sanitation', 'sanitationTableBody');
+        console.log('开始加载汽车停车费数据');
+        await loadFeesByType('car', 'carTableBody');
+        console.log('开始加载摩托车停车费数据');
+        await loadFeesByType('motorcycle', 'motorcycleTableBody');
+        console.log('开始加载其他费用数据');
+        await loadFeesByType('other', 'otherTableBody');
+        console.log('开始加载物业管理费项目数据');
+        await loadPropertyManagementItems();
+        console.log('开始加载电梯管理费项目数据');
+        await loadElevatorManagementItems();
+        console.log('所有数据加载完成');
+    } catch (err) {
+        console.error('加载费用数据失败:', err);
+    }
 }
 
 async function loadElevatorManagementItems() {
     try {
+        console.log('请求电梯管理费项目数据');
         const result = await apiGet('/elevator-management-items');
+        console.log('电梯管理费项目数据:', result);
         const tableBody = document.getElementById('elevatorManagementItemsTableBody');
+        console.log('电梯管理费项目表格容器:', tableBody);
         
         if (result.success && result.data.length > 0) {
             tableBody.innerHTML = result.data.map(item => `
@@ -57,13 +83,20 @@ async function loadElevatorManagementItems() {
         }
     } catch (err) {
         console.error('加载电梯管理费项目失败:', err);
+        const tableBody = document.getElementById('elevatorManagementItemsTableBody');
+        if (tableBody) {
+            tableBody.innerHTML = '<div class="table-row"><div class="table-cell" style="flex:4">加载失败</div></div>';
+        }
     }
 }
 
 async function loadPropertyManagementItems() {
     try {
+        console.log('请求物业管理费项目数据');
         const result = await apiGet('/property-management-items');
+        console.log('物业管理费项目数据:', result);
         const tableBody = document.getElementById('propertyManagementItemsTableBody');
+        console.log('物业管理费项目表格容器:', tableBody);
         
         if (result.success && result.data.length > 0) {
             tableBody.innerHTML = result.data.map(item => `
@@ -83,39 +116,51 @@ async function loadPropertyManagementItems() {
         }
     } catch (err) {
         console.error('加载物业管理费项目失败:', err);
+        const tableBody = document.getElementById('propertyManagementItemsTableBody');
+        if (tableBody) {
+            tableBody.innerHTML = '<div class="table-row"><div class="table-cell" style="flex:4">加载失败</div></div>';
+        }
     }
 }
 
 async function loadFeesByType(type, tableBodyId) {
-    let result;
-    
-    result = await getFees(type);
-    
-    const tableBody = document.getElementById(tableBodyId);
+    try {
+        console.log(`请求${type}费用数据`);
+        const result = await getFees(type);
+        console.log(`${type}费用数据:`, result);
+        const tableBody = document.getElementById(tableBodyId);
+        console.log(`${type}费用表格容器:`, tableBody);
 
-    if (result.success) {
-        const fees = result.data;
+        if (result.success) {
+            const fees = result.data;
 
-        if (fees.length === 0) {
-            tableBody.innerHTML = '<div class="table-row"><div class="table-cell" style="flex:4">暂无数据</div></div>';
-            return;
-        }
+            if (fees.length === 0) {
+                tableBody.innerHTML = '<div class="table-row"><div class="table-cell" style="flex:4">暂无数据</div></div>';
+                return;
+            }
 
-        tableBody.innerHTML = fees.map(fee => `
-            <div class="table-row">
-                <div class="table-cell">${fee.id}</div>
-                <div class="table-cell">${fee.description}</div>
-                <div class="table-cell">${fee.amount.toFixed(2)}</div>
-                <div class="table-cell">
-                    <div class="action-buttons">
-                        <button class="action-btn edit-btn" onclick="editFee('${type}', ${fee.id}, '${fee.description}', ${fee.amount})">编辑</button>
-                        <button class="action-btn delete-btn" onclick="deleteFee('${type}', ${fee.id})">删除</button>
+            tableBody.innerHTML = fees.map(fee => `
+                <div class="table-row">
+                    <div class="table-cell">${fee.id}</div>
+                    <div class="table-cell">${fee.description}</div>
+                    <div class="table-cell">${fee.amount ? fee.amount.toFixed(2) : '0.00'}</div>
+                    <div class="table-cell">
+                        <div class="action-buttons">
+                            <button class="action-btn edit-btn" onclick="editFee('${type}', ${fee.id}, '${fee.description}', ${fee.amount})">编辑</button>
+                            <button class="action-btn delete-btn" onclick="deleteFee('${type}', ${fee.id})">删除</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `).join('');
-    } else {
-        tableBody.innerHTML = '<div class="table-row"><div class="table-cell" style="flex:4">加载失败</div></div>';
+            `).join('');
+        } else {
+            tableBody.innerHTML = '<div class="table-row"><div class="table-cell" style="flex:4">加载失败</div></div>';
+        }
+    } catch (err) {
+        console.error(`加载${type}费用失败:`, err);
+        const tableBody = document.getElementById(tableBodyId);
+        if (tableBody) {
+            tableBody.innerHTML = '<div class="table-row"><div class="table-cell" style="flex:4">加载失败</div></div>';
+        }
     }
 }
 
@@ -134,83 +179,54 @@ function openFeeModal(type, id = null, description = '', amount = '') {
         'other': '其他费用'
     };
 
-    document.getElementById('feeModalTitle').textContent = id ? `编辑${titles[type]}` : `添加${titles[type]}`;
+    document.getElementById('feeModalTitle').textContent = (id ? '编辑' : '添加') + titles[type];
     document.getElementById('feeModal').style.display = 'flex';
-    document.getElementById('feeModal').classList.add('show');
 }
 
 function closeFeeModal() {
     document.getElementById('feeModal').style.display = 'none';
-    document.getElementById('feeModal').classList.remove('show');
 }
 
-function editFee(type, id, description, amount) {
-    openFeeModal(type, id, description, amount);
-}
-
-function deleteFee(type, id) {
+function openDeleteModal(type, id, name) {
     currentDeleteId = id;
     currentDeleteType = type;
-    document.getElementById('deleteMessage').textContent = '确定要删除此费用吗？此操作不可恢复。';
+    document.getElementById('deleteMessage').textContent = `确定要删除"${name}"吗？此操作不可恢复。`;
     document.getElementById('deleteModal').style.display = 'flex';
-    document.getElementById('deleteModal').classList.add('show');
 }
 
 function closeDeleteModal() {
     document.getElementById('deleteModal').style.display = 'none';
-    document.getElementById('deleteModal').classList.remove('show');
-    currentDeleteId = null;
-    currentDeleteType = null;
 }
 
 async function confirmDelete() {
-    if (!currentDeleteId || !currentDeleteType) return;
+    if (!currentDeleteType || !currentDeleteId) return;
 
-    const result = await apiDeleteFee(currentDeleteType, currentDeleteId);
+    try {
+        let result;
+        if (currentDeleteType === 'property_management') {
+            result = await apiDelete(`/property-management-items/${currentDeleteId}`);
+        } else if (currentDeleteType === 'elevator_management') {
+            result = await apiDelete(`/elevator-management-items/${currentDeleteId}`);
+        } else {
+            result = await apiDelete(`/fees/${currentDeleteType}/${currentDeleteId}`);
+        }
 
-    if (result.success) {
+        if (result.success) {
+            if (currentDeleteType === 'property_management') {
+                await loadPropertyManagementItems();
+            } else if (currentDeleteType === 'elevator_management') {
+                await loadElevatorManagementItems();
+            } else {
+                await loadFeesByType(currentDeleteType, `${currentDeleteType}TableBody`);
+            }
+            alert('删除成功！');
+        } else {
+            alert('删除失败：' + (result.message || '未知错误'));
+        }
+    } catch (err) {
+        alert('删除失败：' + err.message);
+    } finally {
         closeDeleteModal();
-        await loadAllFees();
-        alert('删除成功！');
-    } else {
-        alert('删除失败：' + (result.message || '未知错误'));
-    }
-}
-
-function initFormEvents() {
-    const feeForm = document.getElementById('feeForm');
-    if (feeForm) {
-        feeForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            await saveFee();
-        });
-    }
-}
-
-async function saveFee() {
-    const type = document.getElementById('feeType').value;
-    const id = document.getElementById('feeId').value;
-    const description = document.getElementById('feeDescription').value.trim();
-    const amount = parseFloat(document.getElementById('feeAmount').value);
-
-    if (!description || isNaN(amount)) {
-        alert('请填写完整的费用信息');
-        return;
-    }
-
-    let result;
-    if (id) {
-        result = await updateFee(type, parseInt(id), description, amount);
-    } else {
-        result = await addFee(type, description, amount);
-    }
-
-    if (result.success) {
-        closeFeeModal();
-        await loadAllFees();
-        alert(id ? '更新成功！' : '添加成功！');
-    } else {
-        alert((id ? '更新' : '添加') + '失败：' + (result.message || '未知错误'));
     }
 }
 
@@ -231,35 +247,19 @@ function openPropertyManagementItemModal(id, description) {
         descInput.value = '';
     }
 
-    modal.classList.add('show');
+    modal.style.display = 'flex';
 }
 
 function closePropertyManagementItemModal() {
-    const modal = document.getElementById('propertyManagementItemModal');
-    modal.classList.remove('show');
-    currentPropertyManagementItemId = null;
+    document.getElementById('propertyManagementItemModal').style.display = 'none';
 }
 
 function editPropertyManagementItem(id, description) {
     openPropertyManagementItemModal(id, description);
 }
 
-async function deletePropertyManagementItem(id) {
-    if (!confirm('确定要删除此物业管理费项目吗？此操作不可恢复。')) {
-        return;
-    }
-
-    try {
-        const result = await apiDelete(`/property-management-items/${id}`);
-        if (result.success) {
-            await loadPropertyManagementItems();
-            alert('删除成功！');
-        } else {
-            alert('删除失败：' + (result.message || '未知错误'));
-        }
-    } catch (err) {
-        alert('删除失败：' + err.message);
-    }
+function deletePropertyManagementItem(id) {
+    openDeleteModal('property_management', id, '物业管理费项目');
 }
 
 document.getElementById('propertyManagementItemForm').addEventListener('submit', async function(e) {
@@ -280,7 +280,6 @@ document.getElementById('propertyManagementItemForm').addEventListener('submit',
         }
 
         if (result.success) {
-            closePropertyManagementItemModal();
             await loadPropertyManagementItems();
             alert(currentPropertyManagementItemId ? '更新成功！' : '添加成功！');
         } else {
@@ -288,6 +287,8 @@ document.getElementById('propertyManagementItemForm').addEventListener('submit',
         }
     } catch (err) {
         alert((currentPropertyManagementItemId ? '更新' : '添加') + '失败：' + err.message);
+    } finally {
+        closePropertyManagementItemModal();
     }
 });
 
@@ -311,63 +312,46 @@ function openElevatorManagementItemModal(id, description, amount) {
         amountInput.value = '';
     }
 
-    modal.classList.add('show');
+    modal.style.display = 'flex';
 }
 
 function closeElevatorManagementItemModal() {
-    const modal = document.getElementById('elevatorManagementItemModal');
-    modal.classList.remove('show');
-    currentElevatorManagementItemId = null;
+    document.getElementById('elevatorManagementItemModal').style.display = 'none';
 }
 
 function editElevatorManagementItem(id, description, amount) {
     openElevatorManagementItemModal(id, description, amount);
 }
 
-async function deleteElevatorManagementItem(id) {
-    if (!confirm('确定要删除此电梯管理费项目吗？此操作不可恢复。')) {
-        return;
-    }
-
-    try {
-        const result = await apiDelete(`/elevator-management-items/${id}`);
-        if (result.success) {
-            await loadElevatorManagementItems();
-            alert('删除成功！');
-        } else {
-            alert('删除失败：' + (result.message || '未知错误'));
-        }
-    } catch (err) {
-        alert('删除失败：' + err.message);
-    }
+function deleteElevatorManagementItem(id) {
+    openDeleteModal('elevator_management', id, '电梯管理费项目');
 }
 
 document.getElementById('elevatorManagementItemForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
     const description = document.getElementById('elevatorManagementItemDescription').value.trim();
-    const amount = document.getElementById('elevatorManagementItemAmount').value.trim();
-    
+    const amount = parseFloat(document.getElementById('elevatorManagementItemAmount').value);
+
     if (!description) {
         alert('请填写描述');
         return;
     }
-    
-    if (!amount || isNaN(parseFloat(amount))) {
-        alert('请填写有效金额');
+
+    if (isNaN(amount) || amount < 0) {
+        alert('请输入有效的金额');
         return;
     }
 
     try {
         let result;
         if (currentElevatorManagementItemId) {
-            result = await apiPut(`/elevator-management-items/${currentElevatorManagementItemId}`, { description, amount: parseFloat(amount) });
+            result = await apiPut(`/elevator-management-items/${currentElevatorManagementItemId}`, { description, amount });
         } else {
-            result = await apiPost('/elevator-management-items', { description, amount: parseFloat(amount) });
+            result = await apiPost('/elevator-management-items', { description, amount });
         }
 
         if (result.success) {
-            closeElevatorManagementItemModal();
             await loadElevatorManagementItems();
             alert(currentElevatorManagementItemId ? '更新成功！' : '添加成功！');
         } else {
@@ -375,5 +359,59 @@ document.getElementById('elevatorManagementItemForm').addEventListener('submit',
         }
     } catch (err) {
         alert((currentElevatorManagementItemId ? '更新' : '添加') + '失败：' + err.message);
+    } finally {
+        closeElevatorManagementItemModal();
     }
 });
+
+function editFee(type, id, description, amount) {
+    openFeeModal(type, id, description, amount);
+}
+
+function deleteFee(type, id) {
+    openDeleteModal(type, id, '费用');
+}
+
+document.getElementById('feeForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const type = document.getElementById('feeType').value;
+    const id = document.getElementById('feeId').value;
+    const description = document.getElementById('feeDescription').value.trim();
+    const amount = parseFloat(document.getElementById('feeAmount').value);
+
+    if (!description) {
+        alert('请填写描述');
+        return;
+    }
+
+    if (isNaN(amount) || amount < 0) {
+        alert('请输入有效的金额');
+        return;
+    }
+
+    try {
+        let result;
+        if (id) {
+            result = await updateFee(type, id, description, amount);
+        } else {
+            result = await addFee(type, description, amount);
+        }
+
+        if (result.success) {
+            await loadFeesByType(type, `${type}TableBody`);
+            alert(id ? '更新成功！' : '添加成功！');
+        } else {
+            alert((id ? '更新' : '添加') + '失败：' + (result.message || '未知错误'));
+        }
+    } catch (err) {
+        alert((id ? '更新' : '添加') + '失败：' + err.message);
+    } finally {
+        closeFeeModal();
+    }
+});
+
+function initFormEvents() {
+    console.log('初始化表单事件');
+    // 表单事件已经通过addEventListener绑定
+}

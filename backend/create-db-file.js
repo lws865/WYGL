@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const dbDir = path.join(__dirname, '..', 'data');
-const dbPath = path.join(dbDir, 'property_management.db');
+const dbPath = path.join(dbDir, 'property_management.db'); // 使用用户指定的数据库
 
 // 确保data目录存在
 if (!fs.existsSync(dbDir)) {

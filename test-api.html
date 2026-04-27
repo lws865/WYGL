@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 测试工具</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+        .test-section { margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 4px; }
+        .test-section h3 { margin-top: 0; color: #495057; }
+        button { padding: 10px 15px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-warning { background: #ffc107; color: #333; }
+        .result { margin-top: 15px; padding: 15px; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word; font-family: monospace; font-size: 13px; max-height: 300px; overflow-y: auto; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🔧 API 诊断工具</h2>
+
+        <div class="test-section">
+            <h3>1. 测试服务器连接</h3>
+            <button class="btn-primary" onclick="testConnection()">测试连接</button>
+            <div id="connectionResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. 获取物业费年份列表 (GET)</h3>
+            <button class="btn-primary" onclick="testGetYears()">获取年份列表</button>
+            <div id="getYearsResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>3. 添加 2026 年份 (POST)</h3>
+            <button class="btn-success" onclick="testAddYear()">添加 2026 年份</button>
+            <div id="addYearResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>4. 手动执行 SQL</h3>
+            <textarea id="sqlInput" style="width: 100%; height: 60px; margin-bottom: 10px;" placeholder="输入 SQL 语句...">SELECT name FROM sqlite_master WHERE type='table' AND name='property_years'</textarea>
+            <button class="btn-warning" onclick="runCustomSQL()">执行 SQL</button>
+            <div id="sqlResult"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3000/api';
+
+        function showResult(elementId, text, type) {
+            const el = document.getElementById(elementId);
+            el.className = 'result ' + type;
+            el.textContent = text;
+        }
+
+        async function testConnection() {
+            try {
+                const response = await fetch(API_BASE_URL + '/buildings');
+                const result = await response.json();
+                if (response.ok) {
+                    showResult('connectionResult', '✅ 服务器连接成功!\n状态: ' + response.status + '\n数据: ' + JSON.stringify(result, null, 2), 'success');
+                } else {
+                    showResult('connectionResult', '⚠️ 服务器响应异常\n状态: ' + response.status + '\n数据: ' + JSON.stringify(result, null, 2), 'error');
+                }
+            } catch (e) {
+                showResult('connectionResult', '❌ 连接失败!\n错误: ' + e.message + '\n\n请确保后端服务器正在运行:\nnode backend/server-sqljs.js', 'error');
+            }
+        }
+
+        async function testGetYears() {
+            try {
+                const response = await fetch(API_BASE_URL + '/property-fees-years');
+                const result = await response.json();
+                showResult('getYearsResult', '状态: ' + response.status + '\n响应: ' + JSON.stringify(result, null, 2), response.ok ? 'success' : 'error');
+            } catch (e) {
+                showResult('getYearsResult', '❌ 请求失败!\n错误: ' + e.message, 'error');
+            }
+        }
+
+        async function testAddYear() {
+            try {
+                const response = await fetch(API_BASE_URL + '/property-fees-years', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ year: '2026' })
+                });
+                const result = await response.json();
+                showResult('addYearResult', '状态: ' + response.status + '\n响应: ' + JSON.stringify(result, null, 2), response.ok ? 'success' : 'error');
+            } catch (e) {
+                showResult('addYearResult', '❌ 请求失败!\n错误: ' + e.message, 'error');
+            }
+        }
+
+        async function runCustomSQL() {
+            const sql = document.getElementById('sqlInput').value;
+            showResult('sqlResult', '此工具不支持直接执行 SQL。\n请在后端服务器控制台查看输出。\n\n您输入的 SQL:\n' + sql, 'info');
+        }
+    </script>
+</body>
+</html>

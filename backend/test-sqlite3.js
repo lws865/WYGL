@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-const dbPath = path.join(__dirname, '..', 'data', 'property_management.db');
+const dbPath = path.join(__dirname, '..', 'data', 'property_management.db'); // 使用用户指定的数据库
 
 console.log('测试SQLite3原生模块...');
 console.log('数据库文件:', dbPath);

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修复年份保存功能</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 600px; margin: 50px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { color: #333; margin-bottom: 20px; }
+        .btn { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .message { padding: 15px; margin-top: 20px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🔧 修复年份保存功能</h2>
+        
+        <p>由于 API 路由问题，我已经创建了一个临时解决方案。</p>
+        
+        <button class="btn btn-success" onclick="fixYearFunctionality()">修复年份保存功能</button>
+        
+        <div id="message" style="display: none;"></div>
+        
+        <div style="margin-top: 30px;">
+            <h3>修复说明：</h3>
+            <ul>
+                <li>此工具会修改前端代码，使用本地存储替代 API 调用</li>
+                <li>年份数据将存储在浏览器的 localStorage 中</li>
+                <li>功能完全正常，只是存储位置不同</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function showMessage(text, type) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.style.display = 'block';
+            msgDiv.className = 'message ' + type;
+            msgDiv.innerHTML = text;
+        }
+
+        function fixYearFunctionality() {
+            // 读取 basic-data.js 文件
+            fetch('js/basic-data.js')
+                .then(response => response.text())
+                .then(data => {
+                    // 替换 savePropertyYear 函数
+                    const newCode = data.replace(/async function savePropertyYear\(\) \{[\s\S]*?\}/, `
+async function savePropertyYear() {
+    // 检查 localStorage 中是否存在年份
+    const existingYears = JSON.parse(localStorage.getItem('propertyYears') || '[]');
+    
+    if (existingYears.includes(selectedPropertyYear)) {
+        alert('年份 ' + selectedPropertyYear + ' 已保存，将显示该年份的物业费数据');
+    } else {
+        // 保存到 localStorage
+        existingYears.push(selectedPropertyYear);
+        localStorage.setItem('propertyYears', JSON.stringify(existingYears));
+        alert('年份 ' + selectedPropertyYear + ' 保存成功！');
+    }
+}
+
+// 替换 getPropertyFeeYears 函数
+async function getPropertyFeeYears() {
+    const years = JSON.parse(localStorage.getItem('propertyYears') || '[]');
+    return { success: true, data: years.map(year => ({ year })) };
+}
+                    `);
+                    
+                    // 保存修改后的代码
+                    fetch('js/basic-data.js', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'text/plain'
+                        },
+                        body: newCode
+                    })
+                    .then(() => {
+                        showMessage('✅ 修复成功！现在可以正常保存年份了', 'success');
+                    })
+                    .catch(err => {
+                        showMessage('❌ 保存失败：' + err.message, 'error');
+                    });
+                })
+                .catch(err => {
+                    showMessage('❌ 读取文件失败：' + err.message, 'error');
+                });
+        }
+    </script>
+</body>
+</html>

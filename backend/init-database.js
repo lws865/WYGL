@@ -9,7 +9,7 @@ if (!fs.existsSync(dbDir)) {
 }
 
 // 数据库文件路径
-const dbPath = path.join(dbDir, 'property_management.db');
+const dbPath = path.join(dbDir, 'property_management.db'); // 使用用户指定的数据库
 
 console.log('开始初始化SQLite数据库...');
 console.log('数据库文件:', dbPath);

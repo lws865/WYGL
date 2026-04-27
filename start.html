@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>汇泰物业管理系统 - 启动页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .section:last-child {
+            border-bottom: none;
+        }
+        h2 {
+            color: #3498db;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .btn-primary {
+            background-color: #2ecc71;
+        }
+        .btn-primary:hover {
+            background-color: #27ae60;
+        }
+        .info-box {
+            background-color: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .warning-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .success-box {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .login-info {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .login-info h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .feature-list {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+        .feature-list li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>汇泰物业管理系统</h1>
+        
+        <div class="section">
+            <h2>欢迎使用物业管理系统</h2>
+            <p>这是一个功能完整的物业管理系统，包含住户管理、费用管理、统计分析等功能。</p>
+            <div class="success-box">
+                <strong>系统已就绪！</strong> 您可以直接访问以下页面开始使用。
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>快速访问</h2>
+            <p>点击以下按钮直接访问系统页面：</p>
+            <a href="index.html" class="btn btn-primary">📊 系统首页</a>
+            <a href="login.html" class="btn">🔑 登录页面</a>
+            <a href="basic-data.html" class="btn">📋 基础数据</a>
+            <a href="building-data.html" class="btn">🏢 楼房数据</a>
+            <a href="resident-data.html" class="btn">👥 住户数据</a>
+            <a href="statistics-center.html" class="btn">📈 统计中心</a>
+            <a href="payment-platform.html" class="btn">💳 收费平台</a>
+        </div>
+        
+        <div class="section">
+            <h2>默认登录信息</h2>
+            <div class="login-info">
+                <h3>管理员账号</h3>
+                <p><strong>用户名：</strong> admin</p>
+                <p><strong>密码：</strong> aa888888</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>系统功能</h2>
+            <ul class="feature-list">
+                <li>🏢 楼房、楼层、房间信息管理</li>
+                <li>👥 住户信息登记与管理</li>
+                <li>💰 物业费、卫生费、停车费等费用管理</li>
+                <li>📊 缴费统计与分析</li>
+                <li>📋 各种报表导出</li>
+                <li>🔧 系统参数设置</li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h2>使用说明</h2>
+            <div class="info-box">
+                <strong>注意事项：</strong>
+                <ol>
+                    <li>首次使用请先登录系统</li>
+                    <li>登录后可以开始添加基础数据</li>
+                    <li>系统使用SQLite数据库，数据文件位于 <code>data/property_management.db</code></li>
+                    <li>如需启动完整的API服务，请在命令行运行：<code>node backend/server-sqljs.js</code></li>
+                </ol>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>技术支持</h2>
+            <p>如果您在使用过程中遇到问题，可以：</p>
+            <ul>
+                <li>检查浏览器控制台是否有错误信息</li>
+                <li>确保数据库文件存在且可读写</li>
+                <li>尝试重新启动系统服务</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
