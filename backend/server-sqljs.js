@@ -151,6 +151,15 @@ async function initDB() {
         )
     `);
 
+    // 创建电梯楼层基础费表
+    db.run(`
+        CREATE TABLE IF NOT EXISTS elevator_building_base_fees (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            description TEXT NOT NULL,
+            amount REAL NOT NULL
+        )
+    `);
+
     // 检查并添加year字段（如果不存在）
     try {
         const yearCheck = db.exec("SELECT year FROM property_building_base_fees LIMIT 1");
@@ -801,6 +810,70 @@ app.get('/api/property-building-fees', (req, res) => {
     }
 });
 
+// 获取电梯楼层基础费（用于根据层号计算电梯费）
+app.get('/api/elevator-building-fees', (req, res) => {
+    try {
+        const results = db.exec("SELECT * FROM elevator_building_base_fees ORDER BY id");
+        if (results.length > 0) {
+            const columns = results[0].columns;
+            const values = results[0].values;
+            const fees = values.map(row => {
+                const obj = {};
+                columns.forEach((col, i) => obj[col] = row[i]);
+                return obj;
+            });
+            res.json({ success: true, data: fees });
+        } else {
+            res.json({ success: true, data: [] });
+        }
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// 添加电梯楼层基础费
+app.post('/api/elevator-building-fees', (req, res) => {
+    const { description, amount } = req.body;
+    if (!description || amount === undefined || amount === null || amount === '') {
+        return res.status(400).json({ success: false, message: '描述和金额不能为空' });
+    }
+    try {
+        db.run("INSERT INTO elevator_building_base_fees (description, amount) VALUES (?, ?)", [description, parseFloat(amount)]);
+        saveDB();
+        res.json({ success: true, message: '添加成功' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// 更新电梯楼层基础费
+app.put('/api/elevator-building-fees/:id', (req, res) => {
+    const { id } = req.params;
+    const { description, amount } = req.body;
+    if (!description || amount === undefined || amount === null || amount === '') {
+        return res.status(400).json({ success: false, message: '描述和金额不能为空' });
+    }
+    try {
+        db.run("UPDATE elevator_building_base_fees SET description = ?, amount = ? WHERE id = ?", [description, parseFloat(amount), id]);
+        saveDB();
+        res.json({ success: true, message: '更新成功' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// 删除电梯楼层基础费
+app.delete('/api/elevator-building-fees/:id', (req, res) => {
+    const { id } = req.params;
+    try {
+        db.run("DELETE FROM elevator_building_base_fees WHERE id = ?", [id]);
+        saveDB();
+        res.json({ success: true, message: '删除成功' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
 // ==================== 梯号相关API ====================
 
 app.get('/api/stairs', (req, res) => {
@@ -1054,6 +1127,9 @@ app.post('/api/fees/:type', (req, res) => {
             case 'property':
                 tableName = 'property_management_items';
                 break;
+            case 'elevator':
+                tableName = 'elevator_management_items';
+                break;
             case 'sanitation':
                 tableName = 'sanitation_fees';
                 break;
@@ -1091,6 +1167,9 @@ app.put('/api/fees/:type/:id', (req, res) => {
             case 'property':
                 tableName = 'property_management_items';
                 break;
+            case 'elevator':
+                tableName = 'elevator_management_items';
+                break;
             case 'sanitation':
                 tableName = 'sanitation_fees';
                 break;
@@ -1126,6 +1205,9 @@ app.delete('/api/fees/:type/:id', (req, res) => {
         switch (type) {
             case 'property':
                 tableName = 'property_management_items';
+                break;
+            case 'elevator':
+                tableName = 'elevator_management_items';
                 break;
             case 'sanitation':
                 tableName = 'sanitation_fees';

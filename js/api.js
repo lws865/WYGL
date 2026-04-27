@@ -272,6 +272,11 @@ async function getPropertyBuildingFees() {
     return await apiGet('/property-building-fees');
 }
 
+// 获取电梯楼层基础费（用于根据层号计算电梯费）
+async function getElevatorBuildingFees() {
+    return await apiGet('/elevator-building-fees');
+}
+
 // 添加费用
 async function addFee(type, description, amount) {
     return await apiPost(`/fees/${type}`, { description, amount });
