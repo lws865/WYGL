@@ -305,6 +305,144 @@ async function handleFeeSubTypeChange() {
             }
         }
     }
+
+    // 如果选择的是卫生费，自动填写数量、单价、单位和金额
+    if (feeType === 'sanitation' && feeSubType) {
+        console.log('开始处理卫生费');
+
+        // 先获取卫生费项目的数据
+        const sanitationItemsResult = await getFees('sanitation');
+        console.log('卫生费项目数据:', sanitationItemsResult);
+        
+        if (sanitationItemsResult.success) {
+            const sanitationItem = sanitationItemsResult.data.find(item => item.description === feeSubType);
+            
+            if (sanitationItem) {
+                console.log('找到的卫生费项目:', sanitationItem);
+                
+                // 数量输入框填写1
+                const feeQuantity = document.getElementById('feeQuantity');
+                if (feeQuantity) {
+                    feeQuantity.value = 1;
+                    console.log('卫生费数量已设置为1');
+                }
+                
+                // 单价填写卫生费项目的金额
+                const feeUnitPrice = document.getElementById('feeUnitPrice');
+                if (feeUnitPrice) {
+                    feeUnitPrice.value = sanitationItem.amount.toFixed(2);
+                    console.log('卫生费单价已设置:', sanitationItem.amount.toFixed(2));
+                }
+                
+                // 单位设置为年
+                const feeUnit = document.getElementById('feeUnit');
+                if (feeUnit) {
+                    feeUnit.value = '年';
+                    console.log('卫生费单位已设置为年');
+                }
+                
+                // 金额输入框自动填写数量乘单价的结果
+                const totalAmount = sanitationItem.amount * 1;
+                const amountInput = document.getElementById('feeAmount');
+                if (amountInput) {
+                    amountInput.value = totalAmount.toFixed(2);
+                    console.log('卫生费金额已设置:', totalAmount.toFixed(2));
+                }
+            }
+        }
+    }
+
+    // 如果选择的是汽车停车费，自动填写数量、单价、单位和金额
+    if (feeType === 'car' && feeSubType) {
+        console.log('开始处理汽车停车费');
+
+        // 先获取汽车停车费项目的数据
+        const carItemsResult = await getFees('car');
+        console.log('汽车停车费项目数据:', carItemsResult);
+        
+        if (carItemsResult.success) {
+            const carItem = carItemsResult.data.find(item => item.description === feeSubType);
+            
+            if (carItem) {
+                console.log('找到的汽车停车费项目:', carItem);
+                
+                // 数量输入框填写1
+                const feeQuantity = document.getElementById('feeQuantity');
+                if (feeQuantity) {
+                    feeQuantity.value = 1;
+                    console.log('汽车停车费数量已设置为1');
+                }
+                
+                // 单价填写汽车停车费项目的金额
+                const feeUnitPrice = document.getElementById('feeUnitPrice');
+                if (feeUnitPrice) {
+                    feeUnitPrice.value = carItem.amount.toFixed(2);
+                    console.log('汽车停车费单价已设置:', carItem.amount.toFixed(2));
+                }
+                
+                // 单位设置为年
+                const feeUnit = document.getElementById('feeUnit');
+                if (feeUnit) {
+                    feeUnit.value = '年';
+                    console.log('汽车停车费单位已设置为年');
+                }
+                
+                // 金额输入框自动填写数量乘单价的结果
+                const totalAmount = carItem.amount * 1;
+                const amountInput = document.getElementById('feeAmount');
+                if (amountInput) {
+                    amountInput.value = totalAmount.toFixed(2);
+                    console.log('汽车停车费金额已设置:', totalAmount.toFixed(2));
+                }
+            }
+        }
+    }
+
+    // 如果选择的是摩托车停车费，自动填写数量、单价、单位和金额
+    if (feeType === 'motorcycle' && feeSubType) {
+        console.log('开始处理摩托车停车费');
+
+        // 先获取摩托车停车费项目的数据
+        const motorcycleItemsResult = await getFees('motorcycle');
+        console.log('摩托车停车费项目数据:', motorcycleItemsResult);
+        
+        if (motorcycleItemsResult.success) {
+            const motorcycleItem = motorcycleItemsResult.data.find(item => item.description === feeSubType);
+            
+            if (motorcycleItem) {
+                console.log('找到的摩托车停车费项目:', motorcycleItem);
+                
+                // 数量输入框填写1
+                const feeQuantity = document.getElementById('feeQuantity');
+                if (feeQuantity) {
+                    feeQuantity.value = 1;
+                    console.log('摩托车停车费数量已设置为1');
+                }
+                
+                // 单价填写摩托车停车费项目的金额
+                const feeUnitPrice = document.getElementById('feeUnitPrice');
+                if (feeUnitPrice) {
+                    feeUnitPrice.value = motorcycleItem.amount.toFixed(2);
+                    console.log('摩托车停车费单价已设置:', motorcycleItem.amount.toFixed(2));
+                }
+                
+                // 单位设置为年
+                const feeUnit = document.getElementById('feeUnit');
+                if (feeUnit) {
+                    feeUnit.value = '年';
+                    console.log('摩托车停车费单位已设置为年');
+                }
+                
+                // 金额输入框自动填写数量乘单价的结果
+                const totalAmount = motorcycleItem.amount * 1;
+                const amountInput = document.getElementById('feeAmount');
+                if (amountInput) {
+                    amountInput.value = totalAmount.toFixed(2);
+                    console.log('摩托车停车费金额已设置:', totalAmount.toFixed(2));
+                }
+            }
+        }
+    }
 }
 
 // 快速测试API
@@ -1000,7 +1138,7 @@ async function updateFeeSubTypeOptions() {
             carFees.forEach(fee => {
                 const amount = fee.amount || 0;
                 if (amount > 0) {
-                    feeSubTypeSelect.innerHTML += `<option value="${amount}">${fee.description}</option>`;
+                    feeSubTypeSelect.innerHTML += `<option value="${fee.description}">${fee.description}</option>`;
                 }
             });
         } else if (feeType === 'motorcycle') {
@@ -1008,7 +1146,7 @@ async function updateFeeSubTypeOptions() {
             motorcycleFees.forEach(fee => {
                 const amount = fee.amount || 0;
                 if (amount > 0) {
-                    feeSubTypeSelect.innerHTML += `<option value="${amount}">${fee.description}</option>`;
+                    feeSubTypeSelect.innerHTML += `<option value="${fee.description}">${fee.description}</option>`;
                 }
             });
         } else if (feeType === 'sanitation') {
@@ -1016,7 +1154,7 @@ async function updateFeeSubTypeOptions() {
             sanitationFees.forEach(fee => {
                 const amount = fee.amount || 0;
                 if (amount > 0) {
-                    feeSubTypeSelect.innerHTML += `<option value="${amount}">${fee.description}</option>`;
+                    feeSubTypeSelect.innerHTML += `<option value="${fee.description}">${fee.description}</option>`;
                 }
             });
         } else if (feeType === 'other') {
