@@ -194,24 +194,24 @@ async function handleFeeSubTypeChange() {
                 
                 // 判断金额是否为0
                 if (elevatorItem.amount == 0) {
-                    console.log('电梯管理费项目金额为0，使用楼层基础费计算');
+                    console.log('电梯管理费项目金额为0，使用物业楼层基础费计算');
                     
-                    // 和物业费一样的逻辑：根据楼层基础费计算
+                    // 使用物业楼层基础费计算
                     if (currentResident.floorNumber && currentResident.area) {
                         const floorNumber = parseInt(currentResident.floorNumber.toString());
                         console.log('住户楼层:', floorNumber);
                         console.log('住户面积:', currentResident.area);
 
                         try {
-                            // 从elevator_building_base_fees表获取费用数据
-                            const elevatorFeesResult = await getElevatorBuildingFees();
-                            console.log('电梯楼层基础费数据:', elevatorFeesResult);
+                            // 从property_building_base_fees表获取费用数据
+                            const buildingFeesResult = await getPropertyBuildingFees();
+                            console.log('物业楼层基础费数据:', buildingFeesResult);
 
-                            if (elevatorFeesResult.success) {
-                                const elevatorFees = elevatorFeesResult.data;
+                            if (buildingFeesResult.success) {
+                                const buildingFees = buildingFeesResult.data;
 
                                 // 根据层号匹配费用
-                                const matchedFee = elevatorFees.find(fee => {
+                                const matchedFee = buildingFees.find(fee => {
                                     const description = fee.description || '';
 
                                     const rangeMatch1 = description.match(/(\d+)-(\d+)层/);
@@ -248,9 +248,10 @@ async function handleFeeSubTypeChange() {
                                     return false;
                                 });
 
-                                console.log('匹配到的费用:', matchedFee);
+                                console.log('匹配到的物业楼层基础费:', matchedFee);
 
                                 if (matchedFee && matchedFee.amount > 0) {
+                                    // 单价 = 物业楼层基础费金额 × 住户面积
                                     const unitPrice = matchedFee.amount * currentResident.area;
                                     console.log('计算的单价:', unitPrice);
 
@@ -262,11 +263,11 @@ async function handleFeeSubTypeChange() {
                                     
                                     updateFeeAmount();
                                 } else {
-                                    console.log('没有找到匹配的费用或金额不大于0');
+                                    console.log('没有找到匹配的物业楼层基础费或金额不大于0');
                                 }
                             }
                         } catch (err) {
-                            console.error('获取电梯楼层基础费失败:', err);
+                            console.error('获取物业楼层基础费失败:', err);
                         }
                     }
                 } else {
@@ -751,8 +752,14 @@ function updateFeeAmount() {
     switch (feeType) {
         case 'property':
             if (unitPrice > 0) {
-                // 对于物业费，单价输入框已经是 金额 * 面积 的结果
-                // 所以直接乘以数量（月数）
+                const totalAmount = unitPrice * quantity;
+                amountInput.value = totalAmount.toFixed(2);
+            } else {
+                amountInput.value = '';
+            }
+            break;
+        case 'elevator':
+            if (unitPrice > 0) {
                 const totalAmount = unitPrice * quantity;
                 amountInput.value = totalAmount.toFixed(2);
             } else {
