@@ -522,23 +522,69 @@ async function handleFeeSubTypeChange() {
 // 处理收费模式切换（自动/手动）
 function handleFeeModeChange() {
     const feeMode = document.getElementById('feeMode').value;
+    const feeQuantity = document.getElementById('feeQuantity');
+    const feeUnit = document.getElementById('feeUnit');
     const feeUnitPrice = document.getElementById('feeUnitPrice');
     const feeAmount = document.getElementById('feeAmount');
+    const feeSubTypeSelect = document.getElementById('feeSubType');
+    const feeSubTypeInputGroup = document.getElementById('feeSubTypeInputGroup');
     
     console.log('收费模式已切换:', feeMode);
     
     if (feeMode === 'manual') {
-        // 手动模式：清空单价和金额，允许用户手动输入
+        // 手动模式：隐藏子项下拉列表，显示输入框所在的整行
+        if (feeSubTypeSelect) {
+            feeSubTypeSelect.style.display = 'none';
+        }
+        if (feeSubTypeInputGroup) {
+            feeSubTypeInputGroup.style.display = 'block';
+            const feeSubTypeInput = document.getElementById('feeSubTypeInput');
+            if (feeSubTypeInput) {
+                feeSubTypeInput.value = '';
+            }
+        }
+        
+        // 数量输入框：清空并变为可输入状态
+        if (feeQuantity) {
+            feeQuantity.value = '';
+            feeQuantity.disabled = false;
+            console.log('数量输入框已启用');
+        }
+        
+        // 单位输入框：清空readonly属性，变为可输入状态
+        if (feeUnit) {
+            feeUnit.removeAttribute('readonly');
+            feeUnit.value = '';
+            console.log('单位输入框readonly属性已移除，当前readonly:', feeUnit.hasAttribute('readonly'));
+        }
+        
+        // 单价输入框：清空并变为可输入状态
         if (feeUnitPrice) {
             feeUnitPrice.value = '';
             feeUnitPrice.disabled = false;
+            console.log('单价输入框已启用');
         }
+        
+        // 金额输入框：清空并变为可输入状态，金额会根据数量和单价自动计算
         if (feeAmount) {
             feeAmount.value = '';
             feeAmount.disabled = false;
+            console.log('金额输入框已启用');
         }
     } else {
-        // 自动模式：重新触发子项选择逻辑，自动填充费用
+        // 自动模式：显示子项下拉列表，隐藏输入框所在的整行
+        if (feeSubTypeSelect) {
+            feeSubTypeSelect.style.display = 'block';
+        }
+        if (feeSubTypeInputGroup) {
+            feeSubTypeInputGroup.style.display = 'none';
+            const feeSubTypeInput = document.getElementById('feeSubTypeInput');
+            if (feeSubTypeInput) {
+                feeSubTypeInput.value = '';
+            }
+        }
+        
+        // 重新触发子项选择逻辑，自动填充费用
         handleFeeSubTypeChange();
     }
 }

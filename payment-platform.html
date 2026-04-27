@@ -68,6 +68,9 @@
                                     <option value="">收费细项</option>
                                 </select>
                             </div>
+                            <div id="feeSubTypeInputGroup" style="display: none; margin-bottom: 10px;">
+                                <input type="text" id="feeSubTypeInput" class="form-control" placeholder="输入收费细项">
+                            </div>
                             <div class="inline-group">
                                 <input type="number" id="feeQuantity" class="form-control" value="1" min="1" oninput="updateFeeAmount()">
                                 <input type="text" id="feeUnit" class="form-control" readonly placeholder="单位">
@@ -82,8 +85,6 @@
                             </div>
                             <div class="inline-group">
                                 <button class="btn btn-secondary" onclick="addToPaymentList()">添加到收费列表</button>
-                                <button class="btn btn-info" onclick="testPropertyFeeCalculation()">测试物业费计算</button>
-                                <button class="btn btn-warning" onclick="testAPI()">快速测试API</button>
                             </div>
                         </div>
                     </div>
