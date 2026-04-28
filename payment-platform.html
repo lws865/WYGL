@@ -1,55 +1,90 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+    <!-- 页面字符编码设置为UTF-8，支持中文显示 -->
     <meta charset="UTF-8">
+    <!-- 设置页面视口，支持移动端响应式布局 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 页面标题 -->
     <title>收费平台 - 汇泰物业管理系统</title>
+    <!-- 引入全局样式文件 -->
     <link rel="stylesheet" href="css/style.css">
+    <!-- 引入收费平台专用样式文件 -->
     <link rel="stylesheet" href="css/payment-platform.css">
 </head>
 <body>
+    <!-- 应用容器 -->
     <div class="app-container">
+        <!-- 主内容容器 -->
         <div class="main-container">
+            <!-- 收费平台头部区域 -->
             <div class="payment-platform-header">
+                <!-- 页面标题 -->
                 <span class="payment-platform-title">收费平台</span>
+                <!-- 关闭按钮，点击关闭当前窗口 -->
                 <button class="btn btn-danger btn-sm" onclick="window.close()">关闭</button>
             </div>
 
+            <!-- 页面内容区域 -->
             <div class="page-content">
+                <!-- 收费布局容器 -->
                 <div class="payment-layout">
+                    <!-- 住户信息区域 -->
                     <div class="payment-section">
+                        <!-- 区域标题 -->
                         <div class="section-header">住户信息</div>
+                        <!-- 区域内容 -->
                         <div class="section-body">
+                            <!-- 住户搜索容器 -->
                             <div class="search-wrapper" style="position: relative; width: 100%;">
+                                <!-- 住户搜索输入框，输入时触发searchResidents函数进行模糊搜索 -->
                                 <input type="text" id="residentSearch" class="form-control" placeholder="搜索住户..." oninput="searchResidents()">
+                                <!-- 搜索结果下拉列表容器 -->
                                 <div id="searchResults" class="search-results"></div>
                             </div>
+                            <!-- 内联表单组：楼号、梯号、层号、房号选择 -->
                             <div class="inline-group">
+                                <!-- 楼号选择框，变化时触发updateStairOptions更新梯号选项 -->
                                 <select id="buildingSelect" class="form-control" onchange="updateStairOptions()">
                                     <option value="">楼号</option>
                                 </select>
+                                <!-- 梯号选择框，变化时触发updateFloorOptions更新层号选项 -->
                                 <select id="stairSelect" class="form-control" onchange="updateFloorOptions()">
                                     <option value="">梯号</option>
                                 </select>
+                                <!-- 层号选择框，变化时触发updateRoomOptions更新房号选项 -->
                                 <select id="floorSelect" class="form-control" onchange="updateRoomOptions()">
                                     <option value="">层号</option>
                                 </select>
+                                <!-- 房号选择框，变化时触发loadResidentByRoom加载住户信息 -->
                                 <select id="roomSelect" class="form-control" onchange="loadResidentByRoom()">
                                     <option value="">房号</option>
                                 </select>
                             </div>
+                            <!-- 住户信息展示框 -->
                             <div class="resident-info-box">
+                                <!-- 住户姓名 -->
                                 <span>住户：<b id="residentName">-</b></span>
+                                <!-- 住户电话 -->
                                 <span>电话：<b id="residentPhone">-</b></span>
+                                <!-- 住户面积 -->
                                 <span>面积：<b id="residentArea">-</b></span>
                             </div>
                         </div>
                     </div>
 
+                    <!-- 收费项目区域 -->
                     <div class="payment-section">
-                        <div class="section-header">收费项目</div>
+                        <!-- 区域标题 -->
+                        <div class="section-header">收费项目
+                            <!-- 收费日期选择框 -->
+                            <input type="date" id="paymentDate" class="form-control date-input">
+                        </div>
+                        <!-- 区域内容 -->
                         <div class="section-body">
+                            <!-- 收费分类选择组 -->
                             <div class="inline-group">
+                                <!-- 收费分类选择框，变化时更新子项选项和金额 -->
                                 <select id="feeType" class="form-control" onchange="updateFeeSubTypeOptions(); updateFeeAmount();">
                                     <option value="">收费分类</option>
                                     <option value="property">物业费</option>
@@ -60,45 +95,64 @@
                                     <option value="water">水费</option>
                                     <option value="other">其他费用</option>
                                 </select>
+                                <!-- 收费模式选择框（自动/手动），默认隐藏，选择其他费用时显示 -->
                                 <select id="feeMode" class="form-control" style="display: none;" onchange="handleFeeModeChange()">
                                     <option value="auto">自动</option>
                                     <option value="manual">手动</option>
                                 </select>
+                                <!-- 收费细项选择框，变化时触发handleFeeSubTypeChange处理费用计算 -->
                                 <select id="feeSubType" class="form-control" onchange="handleFeeSubTypeChange()">
                                     <option value="">收费细项</option>
                                 </select>
                             </div>
+                            <!-- 手动模式下的收费细项输入框组，默认隐藏 -->
                             <div id="feeSubTypeInputGroup" style="display: none; margin-bottom: 10px;">
+                                <!-- 手动输入收费细项的输入框 -->
                                 <input type="text" id="feeSubTypeInput" class="form-control" placeholder="输入收费细项">
                             </div>
+                            <!-- 费用计算输入组 -->
                             <div class="inline-group">
+                                <!-- 数量输入框，输入时触发 updateFeeAmount 更新金额 -->
                                 <input type="number" id="feeQuantity" class="form-control" value="1" min="1" oninput="updateFeeAmount()">
+                                <!-- 单位输入框，只读模式 -->
                                 <input type="text" id="feeUnit" class="form-control" readonly placeholder="单位">
+                                <!-- 单价输入框，输入时触发 updateFeeAmount 更新金额 -->
                                 <input type="number" id="feeUnitPrice" class="form-control" step="0.01" oninput="updateFeeAmount()" placeholder="单价">
-                                <input type="number" id="feeAmount" class="form-control" step="0.01" placeholder="金额">
                             </div>
+                            <!-- 金额输入组（下一行） -->
                             <div class="inline-group">
-                                <select id="paymentYear" class="form-control">
-                                    <option value="">年份</option>
-                                </select>
-                                <input type="date" id="paymentDate" class="form-control">
+                                <!-- 金额输入框，显示计算结果（不可写入） -->
+                                <input type="number" id="feeAmount" class="form-control" step="0.01" placeholder="金额" readonly>
+                                <!-- 实收金额输入框，可手动修改 -->
+                                <input type="number" id="actualAmount" class="form-control" step="0.01" placeholder="实收金额" oninput="syncActualAmount()">
                             </div>
+                            
+                            <!-- 操作按钮组 -->
                             <div class="inline-group">
+                                <!-- 添加到收费列表按钮 -->
                                 <button class="btn btn-secondary" onclick="addToPaymentList()">添加到收费列表</button>
                             </div>
                         </div>
                     </div>
 
+                    <!-- 收费列表区域 -->
                     <div class="payment-section payment-list-section">
+                        <!-- 区域标题，显示项目数量 -->
                         <div class="section-header">收费列表 <span id="itemCount" class="item-count"></span></div>
+                        <!-- 区域内容 -->
                         <div class="section-body" style="flex-direction: column;">
+                            <!-- 收费列表容器 -->
                             <div id="paymentListContainer" class="payment-list"></div>
+                            <!-- 备注输入框 -->
                             <textarea id="feeRemark" class="form-control remark-input" placeholder="备注信息..."></textarea>
+                            <!-- 收费底部区域 -->
                             <div class="payment-footer">
+                                <!-- 合计金额显示 -->
                                 <div class="payment-total">
                                     <span>合计：</span>
                                     <span id="totalAmount" class="text-primary">¥0.00</span>
                                 </div>
+                                <!-- 确认收费按钮，默认禁用，有收费项目时启用 -->
                                 <button id="confirmBtn" class="btn btn-primary" onclick="confirmPayment()" disabled>确认收费</button>
                             </div>
                         </div>
@@ -108,7 +162,9 @@
         </div>
     </div>
 
+    <!-- 引入API接口文件 -->
     <script src="js/api.js"></script>
+    <!-- 引入收费平台业务逻辑文件 -->
     <script src="js/payment-platform.js"></script>
 </body>
 </html>

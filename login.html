@@ -1,120 +1,161 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+    <!-- 设置页面字符编码为UTF-8，确保中文正常显示 -->
     <meta charset="UTF-8">
+    <!-- 配置视口，支持移动端响应式布局 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 页面标题 -->
     <title>汇泰物业管理系统 - 登录</title>
+    <!-- 引入全局样式文件 -->
     <link rel="stylesheet" href="css/style.css">
+    <!-- 登录页面专属样式 -->
     <style>
+        /* 页面主体样式 */
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #1E293B 0%, #334155 100%);
-            margin: 0;
+            display: flex;              /* 使用flex布局 */
+            justify-content: center;    /* 水平居中 */
+            align-items: center;        /* 垂直居中 */
+            min-height: 100vh;          /* 最小高度为视口高度 */
+            background: linear-gradient(135deg, #1E293B 0%, #334155 100%); /* 渐变背景 */
+            margin: 0;                  /* 清除默认边距 */
         }
+        /* 登录框样式 */
         .login-box {
-            background: white;
-            padding: 32px;
-            border-radius: 8px;
-            width: 100%;
-            max-width: 360px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            background: white;          /* 白色背景 */
+            padding: 32px;              /* 内边距 */
+            border-radius: 8px;         /* 圆角 */
+            width: 100%;                /* 宽度100% */
+            max-width: 360px;           /* 最大宽度360px */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* 阴影效果 */
         }
+        /* 登录头部样式 */
         .login-header {
-            text-align: center;
-            margin-bottom: 24px;
+            text-align: center;         /* 居中对齐 */
+            margin-bottom: 24px;        /* 底部外边距 */
         }
+        /* 图标样式 */
         .login-header .icon {
-            font-size: 40px;
-            margin-bottom: 12px;
+            font-size: 40px;            /* 图标大小 */
+            margin-bottom: 12px;        /* 底部外边距 */
         }
+        /* 标题样式 */
         .login-header h2 {
-            font-size: 18px;
-            color: #1E293B;
-            margin: 0;
+            font-size: 18px;            /* 字体大小 */
+            color: #1E293B;            /* 字体颜色 */
+            margin: 0;                  /* 清除默认边距 */
         }
+        /* 副标题样式 */
         .login-header p {
-            font-size: 12px;
-            color: #64748B;
-            margin: 4px 0 0 0;
+            font-size: 12px;            /* 字体大小 */
+            color: #64748B;            /* 字体颜色 */
+            margin: 4px 0 0 0;         /* 上边距4px */
         }
+        /* 表单组样式 */
         .login-form .form-group {
-            margin-bottom: 16px;
+            margin-bottom: 16px;        /* 底部外边距 */
         }
+        /* 输入框样式 */
         .login-form input {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #E2E8F0;
-            border-radius: 6px;
-            font-size: 13px;
-            transition: all 0.2s;
+            width: 100%;                /* 宽度100% */
+            padding: 10px 12px;         /* 内边距 */
+            border: 1px solid #E2E8F0;  /* 边框 */
+            border-radius: 6px;         /* 圆角 */
+            font-size: 13px;            /* 字体大小 */
+            transition: all 0.2s;       /* 过渡效果 */
         }
+        /* 输入框聚焦样式 */
         .login-form input:focus {
-            outline: none;
-            border-color: #3B82F6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;              /* 清除默认轮廓 */
+            border-color: #3B82F6;      /* 边框颜色 */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); /* 聚焦阴影 */
         }
+        /* 登录按钮样式 */
         .login-form button {
-            width: 100%;
-            padding: 10px;
-            background: #3B82F6;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
+            width: 100%;                /* 宽度100% */
+            padding: 10px;              /* 内边距 */
+            background: #3B82F6;        /* 背景颜色 */
+            color: white;               /* 字体颜色 */
+            border: none;               /* 无边框 */
+            border-radius: 6px;         /* 圆角 */
+            font-size: 13px;            /* 字体大小 */
+            font-weight: 500;           /* 字体粗细 */
+            cursor: pointer;            /* 鼠标指针样式 */
+            transition: background 0.2s; /* 背景过渡效果 */
         }
+        /* 按钮悬停样式 */
         .login-form button:hover {
-            background: #2563EB;
+            background: #2563EB;        /* 悬停背景颜色 */
         }
     </style>
 </head>
 <body>
+    <!-- 登录框容器 -->
     <div class="login-box">
+        <!-- 登录头部区域 -->
         <div class="login-header">
+            <!-- 系统图标 -->
             <div class="icon">🏢</div>
+            <!-- 系统标题 -->
             <h2>汇泰物业管理系统</h2>
+            <!-- 系统副标题 -->
             <p>高效管理，贴心服务</p>
         </div>
+        <!-- 登录表单 -->
         <form class="login-form">
+            <!-- 用户名输入框组 -->
             <div class="form-group">
+                <!-- 用户名输入框，默认值为admin -->
                 <input type="text" id="username" placeholder="请输入用户名" value="admin">
             </div>
+            <!-- 密码输入框组 -->
             <div class="form-group">
+                <!-- 密码输入框，默认值为aa888888 -->
                 <input type="password" id="password" placeholder="请输入密码" value="aa888888">
             </div>
+            <!-- 登录按钮，点击触发handleLogin函数 -->
             <button type="button" onclick="handleLogin()">登录</button>
         </form>
     </div>
+    <!-- 登录业务逻辑脚本 -->
     <script>
+        // API基础URL
         const API_BASE_URL = 'http://localhost:3001/api';
 
+        /**
+         * 处理登录请求
+         * @returns {Promise<void>}
+         */
         async function handleLogin() {
+            // 获取用户名和密码
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
             try {
+                // 发送登录请求
                 const response = await fetch(`${API_BASE_URL}/login`, {
-                    method: 'POST',
+                    method: 'POST',                             // 请求方法
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json'      // 请求头
                     },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({ username, password }) // 请求体
                 });
 
+                // 解析响应数据
                 const data = await response.json();
 
+                // 登录成功
                 if (data.success) {
+                    // 保存用户信息到本地存储
                     localStorage.setItem('user', JSON.stringify(data.user));
+                    // 跳转到首页
                     window.location.href = 'index.html';
                 } else {
+                    // 登录失败，显示错误信息
                     alert(data.message || '用户名或密码错误');
                 }
             } catch (error) {
+                // 网络错误处理
                 console.error('登录失败:', error);
                 alert('登录失败，请检查服务器是否启动');
             }

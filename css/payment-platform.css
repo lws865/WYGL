@@ -425,6 +425,23 @@ body {
     margin-bottom: 0;
 }
 
+.section-header .date-input {
+    flex-shrink: 0;
+    width: auto;
+    min-width: 140px;
+    font-size: 12px;
+}
+
+/* 金额输入框样式 - 灰色背景表示不可写 */
+#feeAmount {
+    background-color: #f0f0f0;
+}
+
+/* 实收金额输入框样式 - 白色背景表示可写 */
+#actualAmount {
+    background-color: #ffffff;
+}
+
 .header-fields {
     display: flex;
     gap: 12px;
