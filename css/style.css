@@ -812,7 +812,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    margin-top: auto;
+    margin-top: 0;
 }
 
 .resident-info-box span {

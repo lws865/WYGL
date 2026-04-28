@@ -42,7 +42,7 @@
                                 <!-- 搜索结果下拉列表容器 -->
                                 <div id="searchResults" class="search-results"></div>
                             </div>
-                            <!-- 内联表单组：楼号、梯号、层号、房号选择 -->
+                            <!-- 内联表单组：楼号、梯号、层号选择 -->
                             <div class="inline-group">
                                 <!-- 楼号选择框，变化时触发updateStairOptions更新梯号选项 -->
                                 <select id="buildingSelect" class="form-control" onchange="updateStairOptions()">
@@ -56,11 +56,11 @@
                                 <select id="floorSelect" class="form-control" onchange="updateRoomOptions()">
                                     <option value="">层号</option>
                                 </select>
-                                <!-- 房号选择框，变化时触发loadResidentByRoom加载住户信息 -->
-                                <select id="roomSelect" class="form-control" onchange="loadResidentByRoom()">
-                                    <option value="">房号</option>
-                                </select>
                             </div>
+                            <!-- 房号选择框，变化时触发loadResidentByRoom加载住户信息 -->
+                            <select id="roomSelect" class="form-control" onchange="loadResidentByRoom()">
+                                <option value="">房号</option>
+                            </select>
                             <!-- 住户信息展示框 -->
                             <div class="resident-info-box">
                                 <!-- 住户姓名 -->
@@ -69,6 +69,8 @@
                                 <span>电话：<b id="residentPhone">-</b></span>
                                 <!-- 住户面积 -->
                                 <span>面积：<b id="residentArea">-</b></span>
+                                <!-- 住户备注 -->
+                                <span>备注：<b id="residentRemark">-</b></span>
                             </div>
                         </div>
                     </div>
@@ -85,7 +87,7 @@
                             <!-- 收费分类选择组 -->
                             <div class="inline-group">
                                 <!-- 收费分类选择框，变化时更新子项选项和金额 -->
-                                <select id="feeType" class="form-control" onchange="updateFeeSubTypeOptions(); updateFeeAmount();">
+                                <select id="feeType" class="form-control" onchange="updateFeeSubTypeOptions(); updateFeeAmount();" onclick="resetFeeModeToAuto();">
                                     <option value="">收费分类</option>
                                     <option value="property">物业费</option>
                                     <option value="elevator">电梯费</option>
@@ -124,7 +126,7 @@
                                 <!-- 金额输入框，显示计算结果（不可写入） -->
                                 <input type="number" id="feeAmount" class="form-control" step="0.01" placeholder="金额" readonly>
                                 <!-- 实收金额输入框，可手动修改 -->
-                                <input type="number" id="actualAmount" class="form-control" step="0.01" placeholder="实收金额" oninput="syncActualAmount()">
+                                <input type="number" id="actualAmount" class="form-control" step="0.01" placeholder="实收金额">
                             </div>
                             
                             <!-- 操作按钮组 -->

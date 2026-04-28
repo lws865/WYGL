@@ -596,6 +596,27 @@ async function handleFeeSubTypeChange() {
 }
 
 /**
+ * 重置收费模式为自动（在点击收费分类下拉列表时调用）
+ */
+function resetFeeModeToAuto() {
+    const feeMode = document.getElementById('feeMode');
+    if (feeMode) {
+        // 只有当feeMode可见时才设置（即当前选择的是其他费用）
+        if (feeMode.style.display !== 'none') {
+            // 设置为自动（不触发事件）
+            const eventListener = feeMode.onchange;
+            feeMode.onchange = null;
+            feeMode.value = 'auto';
+            feeMode.onchange = eventListener;
+            console.log('点击收费分类下拉列表，已将feeMode重置为auto');
+            
+            // 执行切换到自动模式的功能
+            handleFeeModeChange();
+        }
+    }
+}
+
+/**
  * 处理收费模式切换（自动/手动）
  */
 function handleFeeModeChange() {
@@ -935,12 +956,14 @@ function updateResidentInfo(resident) {
     const nameEl = document.getElementById('residentName');
     const phoneEl = document.getElementById('residentPhone');
     const areaEl = document.getElementById('residentArea');
+    const remarkEl = document.getElementById('residentRemark');
     const searchEl = document.getElementById('residentSearch');
 
     // 更新显示内容
     if (nameEl) nameEl.textContent = resident.name || '-';
     if (phoneEl) phoneEl.textContent = resident.phone || '-';
     if (areaEl) areaEl.textContent = resident.area ? resident.area.toFixed(2) + '㎡' : '-';
+    if (remarkEl) remarkEl.textContent = resident.remark || '-';
     if (searchEl) {
         searchEl.value = resident.name || '';
     }
@@ -1181,9 +1204,6 @@ async function checkPaymentStatus(residentId) {
     } catch (error) {
         console.error('检查缴费状态出错:', error);
     }
-    
-    // 同步实收金额
-    syncActualAmount();
 }
 
 /**
@@ -1269,9 +1289,6 @@ function updateFeeAmount() {
             setFeeAmount('');
             break;
     }
-    
-    // 同步实收金额
-    syncActualAmount();
 }
 
 /**
@@ -1288,20 +1305,6 @@ function setFeeAmount(value) {
     
     if (actualAmount) {
         actualAmount.value = value;
-    }
-}
-
-/**
- * 同步实收金额
- * 当金额输入框变化时，自动同步到实收金额输入框
- */
-function syncActualAmount() {
-    const feeAmount = document.getElementById('feeAmount');
-    const actualAmount = document.getElementById('actualAmount');
-    
-    if (feeAmount && actualAmount) {
-        // 每次金额输入框得到内容时，都同步到实收金额输入框
-        actualAmount.value = feeAmount.value;
     }
 }
 
@@ -1347,7 +1350,6 @@ async function updateFeeSubTypeOptions() {
     const feeSubTypeSelect = document.getElementById('feeSubType');
     const feeQuantity = document.getElementById('feeQuantity');
     const amountInput = document.getElementById('feeAmount');
-    const actualAmountInput = document.getElementById('actualAmount');
 
     // 清空子项选择
     feeSubTypeSelect.innerHTML = '<option value="">选择子项</option>';
@@ -1373,20 +1375,10 @@ async function updateFeeSubTypeOptions() {
         if (amountInput) {
             amountInput.value = '';
         }
-        
-        // 清空实收金额输入框
-        if (actualAmountInput) {
-            actualAmountInput.value = '';
-        }
     } else {
         // 如果是水费，只清空金额输入框
         if (amountInput) {
             amountInput.value = '';
-        }
-        
-        // 清空实收金额输入框
-        if (actualAmountInput) {
-            actualAmountInput.value = '';
         }
     }
 
@@ -1461,11 +1453,16 @@ async function updateFeeSubTypeOptions() {
     const feeMode = document.getElementById('feeMode');
     if (feeMode) {
         console.log('feeMode元素存在:', feeMode);
+        // 设置自动/手动下拉列表框为自动（不触发事件）
+        const eventListener = feeMode.onchange;
+        feeMode.onchange = null;
+        feeMode.value = 'auto';
+        feeMode.onchange = eventListener;
+        console.log('feeMode已设置为auto');
+        
         if (feeType === 'other') {
             console.log('选择了其他费用，显示feeMode下拉列表');
             feeMode.style.display = 'block';
-            feeMode.value = 'auto';
-            console.log('feeMode已设置为auto');
         } else {
             console.log('不是其他费用，隐藏feeMode下拉列表');
             feeMode.style.display = 'none';
